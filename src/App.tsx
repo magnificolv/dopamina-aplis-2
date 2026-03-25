@@ -173,7 +173,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen h-screen max-h-screen overflow-hidden bg-[#050816] text-white flex flex-col selection:bg-blue-500/30 font-sans">
+    <div className="min-h-screen bg-[#050816] text-white flex flex-col selection:bg-blue-500/30 font-sans">
       {/* Space Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#1a1f35_0%,#050816_100%)]" />
@@ -259,10 +259,10 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden relative z-10">
+      <div className="flex-1 flex relative z-10">
         {/* Main View Area */}
-        <main className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05)_0%,transparent_70%)]">
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <main className="flex-1 flex flex-col relative bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05)_0%,transparent_70%)] overflow-y-auto">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[600px] md:min-h-0">
             <div className="absolute top-6 md:top-12 left-1/2 -translate-x-1/2 text-center w-full px-4">
               <h2 className="text-4xl md:text-7xl font-serif italic tracking-tighter text-white/90 drop-shadow-2xl">
                 The Balance
@@ -274,7 +274,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="relative w-full max-w-5xl aspect-square flex items-center justify-center mt-12 md:mt-20">
+            <div className="relative w-full max-w-4xl aspect-square flex items-center justify-center mt-12 md:mt-20">
               <AnimatePresence mode="wait">
                 {!is3D ? (
                   <motion.div
