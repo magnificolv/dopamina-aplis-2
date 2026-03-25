@@ -67,6 +67,15 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     let interval: any;
     if (isSpinning) {
@@ -144,7 +153,7 @@ export default function App() {
     <div className="max-w-md mx-auto min-h-screen flex flex-col p-4 pb-24 overflow-hidden selection:bg-blue-500/30">
       {/* Dopamine Rain Background */}
       <div className="dopamine-rain">
-        {Array.from({ length: 20 }).map((_, i) => (
+        {Array.from({ length: isMobile ? 8 : 20 }).map((_, i) => (
           <div 
             key={i} 
             className="dopamine-drop"
@@ -228,7 +237,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 relative flex flex-col items-center">
+      <main className="flex-1 relative flex flex-col items-center justify-center">
         <AnimatePresence mode="wait">
           {view === 'chart' && (
             <motion.div
@@ -237,10 +246,10 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ type: "spring", damping: 20, stiffness: 100 }}
-              className="flex flex-col items-center w-full"
+              className="flex flex-col items-center w-full h-full justify-center"
             >
               {/* 3D Container */}
-              <div className="relative w-full aspect-square max-w-[440px] mb-12 perspective-2000">
+              <div className="relative w-full aspect-square max-w-[min(90vw,440px)] perspective-2000">
                 <motion.div 
                   drag
                   dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
@@ -259,54 +268,58 @@ export default function App() {
                   {/* Brain Center with Dynamic Glow */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none brain-animate">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-blue-600/40 blur-[50px] rounded-full scale-[2.5] animate-pulse" />
-                      <div className="absolute inset-0 bg-purple-600/30 blur-[80px] rounded-full scale-[3.5]" />
-                      <div className="absolute inset-0 bg-white/10 blur-[20px] rounded-full scale-[1.5]" />
-                      <Brain size={120} className="text-white relative z-10 filter drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]" />
+                      <div className="absolute inset-0 bg-blue-600/40 blur-[30px] md:blur-[50px] rounded-full scale-[2] md:scale-[2.5] animate-pulse" />
+                      <div className="absolute inset-0 bg-purple-600/30 blur-[50px] md:blur-[80px] rounded-full scale-[2.5] md:scale-[3.5]" />
+                      <div className="absolute inset-0 bg-white/10 blur-[15px] md:blur-[20px] rounded-full scale-[1.2] md:scale-[1.5]" />
+                      <Brain size={isMobile ? 80 : 120} className="text-white relative z-10 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
                     </div>
-                    <div className="mt-6 text-center transform translate-z-[50px]">
+                    <div className="mt-4 md:mt-6 text-center transform translate-z-[50px]">
                       <motion.span 
                         key={healthScore}
                         initial={{ scale: 0.5, opacity: 0, y: 10 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         className={cn(
-                          "text-8xl font-black tracking-tighter block leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]",
+                          "text-6xl md:text-8xl font-black tracking-tighter block leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]",
                           healthScore > 60 ? "text-healthy" : healthScore > 30 ? "text-neutral" : "text-unhealthy"
                         )}
                       >
                         {healthScore}%
                       </motion.span>
-                      <p className="text-[12px] uppercase tracking-[0.5em] text-white/50 font-black mt-2">Neuro-Index</p>
+                      <p className="text-[10px] md:text-[12px] uppercase tracking-[0.5em] text-white/50 font-black mt-1 md:mt-2">Neuro-Index</p>
                     </div>
                   </div>
 
                   {/* The Ring - Rotated and Styled */}
                   <div className="absolute inset-0 flex items-center justify-center transform rotateX(75deg) ring-shadow">
                     <div className="w-full h-full relative preserve-3d">
-                      {/* Depth Layers */}
-                      <div className="absolute inset-0 transform translate-z-[-20px] opacity-20 blur-md scale-[1.05]">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie data={chartData} cx="50%" cy="50%" innerRadius={120} outerRadius={190} dataKey="value" stroke="none">
-                              {chartData.map((entry, index) => (
-                                <Cell key={`cell-shadow-deep-${index}`} fill={CATEGORY_COLORS[entry.category]} />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
+                      {/* Depth Layers - Simplified for mobile */}
+                      {!isMobile && (
+                        <>
+                          <div className="absolute inset-0 transform translate-z-[-20px] opacity-20 blur-md scale-[1.05]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie data={chartData} cx="50%" cy="50%" innerRadius={120} outerRadius={190} dataKey="value" stroke="none">
+                                  {chartData.map((entry, index) => (
+                                    <Cell key={`cell-shadow-deep-${index}`} fill={CATEGORY_COLORS[entry.category]} />
+                                  ))}
+                                </Pie>
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
 
-                      <div className="absolute inset-0 transform translate-z-[-10px] opacity-40 blur-sm">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie data={chartData} cx="50%" cy="50%" innerRadius={115} outerRadius={185} dataKey="value" stroke="none">
-                              {chartData.map((entry, index) => (
-                                <Cell key={`cell-shadow-${index}`} fill={CATEGORY_COLORS[entry.category]} />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
+                          <div className="absolute inset-0 transform translate-z-[-10px] opacity-40 blur-sm">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie data={chartData} cx="50%" cy="50%" innerRadius={115} outerRadius={185} dataKey="value" stroke="none">
+                                  {chartData.map((entry, index) => (
+                                    <Cell key={`cell-shadow-${index}`} fill={CATEGORY_COLORS[entry.category]} />
+                                  ))}
+                                </Pie>
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </>
+                      )}
 
                       {/* Main Ring */}
                       <ResponsiveContainer width="100%" height="100%">
@@ -324,13 +337,13 @@ export default function App() {
                             data={chartData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={110}
-                            outerRadius={180}
+                            innerRadius={isMobile ? 80 : 110}
+                            outerRadius={isMobile ? 130 : 180}
                             paddingAngle={1}
                             dataKey="value"
                             stroke="rgba(255,255,255,0.2)"
                             strokeWidth={1}
-                            isAnimationActive={true}
+                            isAnimationActive={!isMobile}
                             animationDuration={1500}
                           >
                             {chartData.map((entry, index) => (
@@ -338,7 +351,7 @@ export default function App() {
                                 key={`cell-${index}`} 
                                 fill={CATEGORY_COLORS[entry.category]} 
                                 fillOpacity={0.8}
-                                filter="url(#glow)"
+                                filter={isMobile ? "none" : "url(#glow)"}
                                 className="transition-all duration-500 hover:fill-opacity-100 cursor-pointer"
                               />
                             ))}
@@ -353,7 +366,7 @@ export default function App() {
                         let cumulativeValue = 0;
                         for (let i = 0; i < index; i++) cumulativeValue += chartData[i].value;
                         const angle = ((cumulativeValue + source.value / 2) / totalValue) * 360 - 90;
-                        const radius = 145;
+                        const radius = isMobile ? 105 : 145;
                         const x = Math.cos((angle * Math.PI) / 180) * radius;
                         const y = Math.sin((angle * Math.PI) / 180) * radius;
 
@@ -368,13 +381,13 @@ export default function App() {
                           >
                             <div className="flex flex-col items-center gap-1">
                               <div className={cn(
-                                "p-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 shadow-lg",
+                                "p-1 rounded-full bg-black/40 backdrop-blur-md border border-white/20 shadow-lg",
                                 source.category === 'healthy' ? "text-healthy" : source.category === 'neutral' ? "text-neutral" : "text-unhealthy"
                               )}>
-                                <Icon size={14} />
+                                <Icon size={isMobile ? 10 : 14} />
                               </div>
                               <span className={cn(
-                                "text-[9px] font-black tabular-nums px-1 rounded bg-black/60 backdrop-blur-sm border border-white/5",
+                                "text-[8px] md:text-[9px] font-black tabular-nums px-1 rounded bg-black/60 backdrop-blur-sm border border-white/5",
                                 source.category === 'healthy' ? "text-healthy" : source.category === 'neutral' ? "text-neutral" : "text-unhealthy"
                               )}>
                                 {source.percentage.toFixed(0)}%
@@ -386,17 +399,20 @@ export default function App() {
 
                       {/* Inner Glow Ring */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-[220px] h-[220px] rounded-full border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)]" />
+                        <div className={cn(
+                          "rounded-full border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)]",
+                          isMobile ? "w-[160px] h-[160px]" : "w-[220px] h-[220px]"
+                        )} />
                       </div>
                     </div>
                   </div>
 
                   {/* Reflection/Floor */}
-                  <div className="absolute bottom-[-150px] left-1/2 -translate-x-1/2 w-[140%] h-[60px] bg-blue-500/10 blur-[120px] rounded-[100%] transform translate-z-[-300px]" />
+                  <div className="absolute bottom-[-100px] md:bottom-[-150px] left-1/2 -translate-x-1/2 w-[140%] h-[40px] md:h-[60px] bg-blue-500/10 blur-[80px] md:blur-[120px] rounded-[100%] transform translate-z-[-300px]" />
                 </motion.div>
                 
                 {/* Visual Hint & Zoom Control */}
-                <div className="absolute -bottom-16 left-0 right-0 flex flex-col items-center gap-4">
+                <div className="absolute -bottom-12 md:-bottom-16 left-0 right-0 flex flex-col items-center gap-3 md:gap-4">
                   <div className="flex items-center gap-4 w-full px-8">
                     <button 
                       onClick={() => setIsSpinning(!isSpinning)}
@@ -405,9 +421,9 @@ export default function App() {
                         isSpinning ? "bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]" : "bg-white/5 text-white/40"
                       )}
                     >
-                      <Sparkles size={16} className={isSpinning ? "animate-spin" : ""} />
+                      <Sparkles size={14} className={isSpinning ? "animate-spin" : ""} />
                     </button>
-                    <span className="text-[10px] text-white/20 font-black">ZOOM</span>
+                    <span className="text-[9px] text-white/20 font-black">ZOOM</span>
                     <input 
                       type="range" 
                       min="0.5" 
@@ -418,48 +434,10 @@ export default function App() {
                       className="flex-1 accent-blue-500/50 h-1 bg-white/5 rounded-full appearance-none cursor-pointer"
                     />
                   </div>
-                  <div className="text-[10px] text-white/20 uppercase tracking-[0.6em] flex items-center gap-6 font-black">
+                  <div className="text-[9px] text-white/20 uppercase tracking-[0.4em] md:tracking-[0.6em] flex items-center gap-4 md:gap-6 font-black">
                     <span className="animate-bounce">←</span> velc, lai rotētu <span className="animate-bounce">→</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="w-full grid grid-cols-2 gap-3 relative z-10 px-2 mt-8">
-                {chartData.slice(0, 10).map((source, idx) => {
-                  const Icon = ICON_MAP[source.icon] || Star;
-                  return (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      key={source.id} 
-                      className="glass-panel p-4 flex items-center gap-4 group hover:bg-white/10 transition-all border-white/5"
-                    >
-                      <div className={cn("p-2.5 rounded-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-lg", 
-                        source.category === 'healthy' ? "bg-healthy/20 text-healthy shadow-healthy/10" :
-                        source.category === 'neutral' ? "bg-neutral/20 text-neutral shadow-neutral/10" :
-                        "bg-unhealthy/20 text-unhealthy shadow-unhealthy/10"
-                      )}>
-                        <Icon size={18} />
-                      </div>
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-xs font-bold truncate text-white/90">{source.name}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${source.percentage}%` }}
-                              transition={{ duration: 1, delay: 0.5 }}
-                              className="h-full bg-current opacity-70" 
-                              style={{ color: CATEGORY_COLORS[source.category] }} 
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
               </div>
             </motion.div>
           )}
