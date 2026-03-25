@@ -173,7 +173,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050816] text-white flex flex-col overflow-hidden selection:bg-blue-500/30 font-sans">
+    <div className="min-h-screen h-screen max-h-screen overflow-hidden bg-[#050816] text-white flex flex-col selection:bg-blue-500/30 font-sans">
       {/* Space Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#1a1f35_0%,#050816_100%)]" />
@@ -315,26 +315,26 @@ export default function App() {
                           data={chartData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={isMobile ? 80 : 180}
-                          outerRadius={isMobile ? 130 : 260}
+                          innerRadius={isMobile ? 70 : 180}
+                          outerRadius={isMobile ? 110 : 260}
                           paddingAngle={4}
                           cornerRadius={12}
                           dataKey="value"
                           stroke="rgba(255,255,255,0.05)"
                           strokeWidth={1}
-                          isAnimationActive={true}
+                          isAnimationActive={false}
                           onClick={(data) => {
                             const id = data?.payload?.id;
                             if (id) setSelectedId(selectedId === id ? null : id);
                           }}
                           label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index, payload }) => {
                             const RADIAN = Math.PI / 180;
-                            const radius = outerRadius + (isMobile ? 25 : 40);
+                            const radius = outerRadius + (isMobile ? 20 : 40);
                             const x = cx + radius * Math.cos(-midAngle * RADIAN);
                             const y = cy + radius * Math.sin(-midAngle * RADIAN);
                             const isSelected = selectedId === payload.id;
                             
-                            if (isMobile && payload.percentage < 4 && !isSelected) return null;
+                            if (isMobile && payload.percentage < 5 && !isSelected) return null;
                             if (!isMobile && payload.percentage < 1 && !isSelected) return null;
 
                             return (
@@ -380,8 +380,8 @@ export default function App() {
                           data={chartData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={isMobile ? 100 : 210}
-                          outerRadius={isMobile ? 110 : 230}
+                          innerRadius={isMobile ? 85 : 210}
+                          outerRadius={isMobile ? 95 : 230}
                           dataKey="value"
                           stroke="none"
                           fill="none"
@@ -393,7 +393,7 @@ export default function App() {
                             const y = cy + radius * Math.sin(-midAngle * RADIAN);
                             const iconName = payload.icon;
                             
-                            if (isMobile && payload.percentage < 5 && selectedId !== payload.id) return null;
+                            if (isMobile && payload.percentage < 6 && selectedId !== payload.id) return null;
                             if (!isMobile && payload.percentage < 3 && selectedId !== payload.id) return null;
 
                             return (
@@ -446,8 +446,8 @@ export default function App() {
                                   data={chartData}
                                   cx="50%"
                                   cy="50%"
-                                  innerRadius={isMobile ? 80 : 120}
-                                  outerRadius={isMobile ? 130 : 190}
+                                  innerRadius={isMobile ? 70 : 120}
+                                  outerRadius={isMobile ? 110 : 190}
                                   dataKey="value"
                                   stroke="none"
                                   isAnimationActive={false}
@@ -466,8 +466,8 @@ export default function App() {
                                 data={chartData}
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={isMobile ? 80 : 120}
-                                outerRadius={isMobile ? 130 : 190}
+                                innerRadius={isMobile ? 70 : 120}
+                                outerRadius={isMobile ? 110 : 190}
                                 dataKey="value"
                                 stroke="rgba(255,255,255,0.1)"
                                 strokeWidth={1}
@@ -599,8 +599,18 @@ export default function App() {
                       className="absolute inset-0 opacity-0 cursor-pointer"
                     />
                   </div>
-                  <div className="flex flex-col items-end min-w-[60px]">
-                    <span className="text-xs font-mono text-white/80">{source.value.toFixed(1)}</span>
+                  <div className="flex flex-col items-end min-w-[70px] gap-1">
+                    <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/10 focus-within:border-white/30 transition-colors">
+                      <input 
+                        type="number"
+                        min="0"
+                        max="1000"
+                        step="0.1"
+                        value={source.value}
+                        onChange={(e) => updateSource(source.id, { value: parseFloat(e.target.value) || 0 })}
+                        className="bg-transparent border-none outline-none text-xs font-mono text-white/80 w-12 text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                    </div>
                     <span className="text-[9px] font-black text-white/20 uppercase tracking-tighter">
                       {((source.value / totalValue) * 100).toFixed(1)}%
                     </span>
