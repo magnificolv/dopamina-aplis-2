@@ -10,7 +10,7 @@ import {
   Wind, Moon, Sun, Code, ShoppingCart, MessageSquare,
   Dices, Trees, BookOpen, Thermometer, Apple, CheckCircle, Award,
   Search, Settings, Sparkles, Trophy, Target, RotateCcw, Palette,
-  Box, Download, Upload
+  Box, Download, Upload, LayoutList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DopamineSource, Category, Snapshot } from './types';
@@ -173,7 +173,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050816] text-white flex flex-col selection:bg-blue-500/30 font-sans">
+    <div className="h-screen max-h-screen overflow-hidden bg-[#050816] text-white flex flex-col selection:bg-blue-500/30 font-sans">
       {/* Space Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#1a1f35_0%,#050816_100%)]" />
@@ -228,6 +228,22 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-xl border transition-all",
+              sidebarOpen 
+                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400" 
+                : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+            )}
+          >
+            <LayoutList size={18} />
+            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Sources</span>
+            <span className="bg-white/10 px-1.5 py-0.5 rounded-md text-[9px]">{sources.length}</span>
+          </button>
+
+          <div className="h-8 w-[1px] bg-white/5 mx-2" />
+
           <div className="hidden md:flex items-center gap-2 mr-4 border-r border-white/10 pr-6">
             <button 
               onClick={saveSnapshot}
@@ -259,10 +275,10 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex-1 flex relative z-10">
+      <div className="flex-1 flex relative z-10 overflow-hidden">
         {/* Main View Area */}
-        <main className="flex-1 flex flex-col relative bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05)_0%,transparent_70%)] overflow-y-auto">
-          <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[600px] md:min-h-0">
+        <main className="flex-1 flex flex-col relative bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05)_0%,transparent_70%)] overflow-hidden">
+          <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
             <div className="absolute top-6 md:top-12 left-1/2 -translate-x-1/2 text-center w-full px-4">
               <h2 className="text-4xl md:text-7xl font-serif italic tracking-tighter text-white/90 drop-shadow-2xl">
                 The Balance
@@ -514,138 +530,157 @@ export default function App() {
           </div>
         </main>
 
-        {/* Sidebar */}
-        <aside 
-          className={cn(
-            "w-full md:w-[450px] bg-black/60 backdrop-blur-3xl border-l border-white/5 flex flex-col transition-all duration-500 absolute md:relative inset-y-0 right-0 z-50",
-            !sidebarOpen && "translate-x-full md:translate-x-0 md:w-0 overflow-hidden"
-          )}
-        >
-          <div className="p-8 flex items-center justify-between border-b border-white/5">
-            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/40 flex items-center gap-3">
-              Sources
-              <span className="bg-white/5 px-2 py-0.5 rounded-full text-[9px] border border-white/5">{sources.length}</span>
-            </h3>
-            <button 
-              onClick={() => setSidebarOpen(false)}
-              className="md:hidden text-white/40 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-            {sources.map((source) => (
-              <div 
-                key={source.id} 
-                className={cn(
-                  "bg-white/[0.02] border border-white/5 rounded-2xl p-5 transition-all hover:bg-white/[0.05] group relative overflow-hidden",
-                  selectedId === source.id && "ring-1 ring-white/20 bg-white/[0.08]"
-                )}
-                onClick={() => setSelectedId(source.id)}
+        {/* Sidebar / Drawer */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSidebarOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              />
+              
+              {/* Drawer */}
+              <motion.aside 
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-[#0a0c1a]/95 backdrop-blur-3xl border-l border-white/10 flex flex-col z-[70] shadow-2xl"
               >
-                {selectedId === source.id && (
-                  <motion.div 
-                    layoutId="active-glow"
-                    className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent pointer-events-none"
-                  />
-                )}
-                
-                <div className="flex items-center gap-4 mb-5">
-                  <div className="text-2xl w-12 h-12 flex items-center justify-center bg-white/5 rounded-xl border border-white/5">
-                    {getIconEmoji(source.icon)}
+                <div className="p-8 flex items-center justify-between border-b border-white/5">
+                  <div className="flex flex-col">
+                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/40 flex items-center gap-3">
+                      Dopamine Sources
+                    </h3>
+                    <span className="text-[10px] text-white/20 mt-1">Manage your architecture</span>
                   </div>
-                  <div className="flex-1">
-                    <input 
-                      type="text"
-                      value={source.name}
-                      onChange={(e) => updateSource(source.id, { name: e.target.value })}
-                      className="bg-transparent border-none outline-none text-sm font-serif italic tracking-wide w-full focus:text-white transition-colors"
-                    />
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className={cn("w-1.5 h-1.5 rounded-full", 
-                        source.category === 'healthy' ? "bg-healthy" : 
-                        source.category === 'neutral' ? "bg-neutral" : "bg-unhealthy"
-                      )} />
-                      <span className="text-[8px] uppercase font-black tracking-widest text-white/30">{source.category}</span>
-                    </div>
-                  </div>
-                  
                   <button 
-                    onClick={(e) => { e.stopPropagation(); removeSource(source.id); }}
-                    className="opacity-0 group-hover:opacity-100 p-2 text-white/20 hover:text-unhealthy transition-all"
+                    onClick={() => setSidebarOpen(false)}
+                    className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-all"
                   >
-                    <Trash2 size={14} />
+                    <X size={20} />
                   </button>
                 </div>
 
-                <div className="flex items-center gap-6">
-                  <div className="flex-1 relative h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={false}
-                      animate={{ width: `${source.value}%` }}
-                      className={cn("absolute inset-y-0 left-0 rounded-full", 
-                        source.category === 'healthy' ? "bg-healthy" : 
-                        source.category === 'neutral' ? "bg-neutral" : "bg-unhealthy"
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                  {sources.map((source) => (
+                    <div 
+                      key={source.id} 
+                      className={cn(
+                        "bg-white/[0.02] border border-white/5 rounded-2xl p-5 transition-all hover:bg-white/[0.05] group relative overflow-hidden",
+                        selectedId === source.id && "ring-1 ring-white/20 bg-white/[0.08]"
                       )}
-                    />
-                    <input 
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      value={source.value}
-                      onChange={(e) => updateSource(source.id, { value: parseFloat(e.target.value) })}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex flex-col items-end min-w-[70px] gap-1">
-                    <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/10 focus-within:border-white/30 transition-colors">
-                      <input 
-                        type="number"
-                        min="0"
-                        max="1000"
-                        step="0.1"
-                        value={source.value}
-                        onChange={(e) => updateSource(source.id, { value: parseFloat(e.target.value) || 0 })}
-                        className="bg-transparent border-none outline-none text-xs font-mono text-white/80 w-12 text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
+                      onClick={() => setSelectedId(source.id)}
+                    >
+                      {selectedId === source.id && (
+                        <motion.div 
+                          layoutId="active-glow"
+                          className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent pointer-events-none"
+                        />
+                      )}
+                      
+                      <div className="flex items-center gap-4 mb-5">
+                        <div className="text-2xl w-12 h-12 flex items-center justify-center bg-white/5 rounded-xl border border-white/5">
+                          {getIconEmoji(source.icon)}
+                        </div>
+                        <div className="flex-1">
+                          <input 
+                            type="text"
+                            value={source.name}
+                            onChange={(e) => updateSource(source.id, { name: e.target.value })}
+                            className="bg-transparent border-none outline-none text-sm font-serif italic tracking-wide w-full focus:text-white transition-colors"
+                          />
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className={cn("w-1.5 h-1.5 rounded-full", 
+                              source.category === 'healthy' ? "bg-healthy" : 
+                              source.category === 'neutral' ? "bg-neutral" : "bg-unhealthy"
+                            )} />
+                            <span className="text-[8px] uppercase font-black tracking-widest text-white/30">{source.category}</span>
+                          </div>
+                        </div>
+                        
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); removeSource(source.id); }}
+                          className="opacity-0 group-hover:opacity-100 p-2 text-white/20 hover:text-unhealthy transition-all"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-6">
+                        <div className="flex-1 relative h-1 bg-white/5 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={false}
+                            animate={{ width: `${source.value}%` }}
+                            className={cn("absolute inset-y-0 left-0 rounded-full", 
+                              source.category === 'healthy' ? "bg-healthy" : 
+                              source.category === 'neutral' ? "bg-neutral" : "bg-unhealthy"
+                            )}
+                          />
+                          <input 
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value={source.value}
+                            onChange={(e) => updateSource(source.id, { value: parseFloat(e.target.value) })}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                        </div>
+                        <div className="flex flex-col items-end min-w-[70px] gap-1">
+                          <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/10 focus-within:border-white/30 transition-colors">
+                            <input 
+                              type="number"
+                              min="0"
+                              max="1000"
+                              step="0.1"
+                              value={source.value}
+                              onChange={(e) => updateSource(source.id, { value: parseFloat(e.target.value) || 0 })}
+                              className="bg-transparent border-none outline-none text-xs font-mono text-white/80 w-12 text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                          </div>
+                          <span className="text-[9px] font-black text-white/20 uppercase tracking-tighter">
+                            {((source.value / totalValue) * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-[9px] font-black text-white/20 uppercase tracking-tighter">
-                      {((source.value / totalValue) * 100).toFixed(1)}%
-                    </span>
-                  </div>
+                  ))}
+
+                  <button 
+                    onClick={addSource}
+                    className="w-full py-6 border border-dashed border-white/10 rounded-2xl flex items-center justify-center gap-3 text-white/20 hover:text-white/40 hover:border-white/20 hover:bg-white/[0.02] transition-all group"
+                  >
+                    <Plus size={16} className="group-hover:rotate-90 transition-transform duration-500" />
+                    <span className="text-[9px] font-black uppercase tracking-[0.3em]">Add New Source</span>
+                  </button>
                 </div>
-              </div>
-            ))}
 
-            <button 
-              onClick={addSource}
-              className="w-full py-6 border border-dashed border-white/10 rounded-2xl flex items-center justify-center gap-3 text-white/20 hover:text-white/40 hover:border-white/20 hover:bg-white/[0.02] transition-all group"
-            >
-              <Plus size={16} className="group-hover:rotate-90 transition-transform duration-500" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em]">Add New Source</span>
-            </button>
-          </div>
-
-          <div className="p-8 border-t border-white/5 bg-black/40 space-y-4">
-            <div className="flex justify-between text-[9px] uppercase font-black tracking-[0.2em] text-white/20">
-              <span>Total Input</span>
-              <span className="font-mono text-white/40">{totalValue.toFixed(1)}%</span>
-            </div>
-            <div className="flex justify-between text-[9px] uppercase font-black tracking-[0.2em] text-white/20">
-              <span>Normalized</span>
-              <span className="text-healthy font-mono">100.0%</span>
-            </div>
-            
-            <button 
-              onClick={resetToDefaults}
-              className="w-full py-3 text-[8px] uppercase font-black tracking-[0.3em] text-white/20 hover:text-unhealthy transition-colors"
-            >
-              Reset to Defaults
-            </button>
-          </div>
-        </aside>
+                <div className="p-8 border-t border-white/5 bg-black/40 space-y-4">
+                  <div className="flex justify-between text-[9px] uppercase font-black tracking-[0.2em] text-white/20">
+                    <span>Total Input</span>
+                    <span className="font-mono text-white/40">{totalValue.toFixed(1)}%</span>
+                  </div>
+                  <div className="flex justify-between text-[9px] uppercase font-black tracking-[0.2em] text-white/20">
+                    <span>Normalized</span>
+                    <span className="text-healthy font-mono">100.0%</span>
+                  </div>
+                  
+                  <button 
+                    onClick={resetToDefaults}
+                    className="w-full py-3 text-[8px] uppercase font-black tracking-[0.3em] text-white/20 hover:text-unhealthy transition-colors"
+                  >
+                    Reset to Defaults
+                  </button>
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Sidebar Toggle Button (Mobile) */}
         {!sidebarOpen && (
