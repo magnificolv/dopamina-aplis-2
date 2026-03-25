@@ -9,7 +9,7 @@ import {
   HeartPulse, Users, Star, Info, X, Heart, Utensils,
   Wind, Moon, Sun, Code, ShoppingCart, MessageSquare,
   Dices, Trees, BookOpen, Thermometer, Apple, CheckCircle, Award,
-  Search, Settings, Sparkles, Trophy, Target
+  Search, Settings, Sparkles, Trophy, Target, RotateCcw, Palette
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DopamineSource, Category, Snapshot } from './types';
@@ -22,46 +22,25 @@ const CATEGORY_COLORS = {
 };
 
 const DEFAULT_SOURCES: DopamineSource[] = [
-  { id: '1', name: 'Nikotīns', value: 20, category: 'unhealthy', icon: 'Cigarette' },
-  { id: '2', name: 'Saldumi', value: 20, category: 'unhealthy', icon: 'Coffee' },
-  { id: '3', name: 'YouTube/Twitter', value: 15, category: 'unhealthy', icon: 'Smartphone' },
-  { id: '4', name: 'Programmēšana', value: 10, category: 'healthy', icon: 'Code' },
-  { id: '5', name: 'Porn', value: 10, category: 'unhealthy', icon: 'Flame' },
-  { id: '6', name: 'Weed', value: 10, category: 'unhealthy', icon: 'Wind' },
-  { id: '7', name: 'Gym & Fitness', value: 10, category: 'healthy', icon: 'Dumbbell' },
-  { id: '8', name: 'Fiziska tuvība/sex', value: 5, category: 'healthy', icon: 'Heart' },
-  { id: '9', name: 'Video spēles', value: 5, category: 'neutral', icon: 'Gamepad2' },
-  { id: '10', name: 'Ēdiens', value: 5, category: 'neutral', icon: 'Utensils' },
-  { id: '11', name: 'Mīļums no sievas', value: 5, category: 'healthy', icon: 'Heart' },
-  { id: '12', name: 'Meditācija', value: 3, category: 'healthy', icon: 'Zap' },
-  { id: '13', name: 'Connection ar human', value: 2, category: 'healthy', icon: 'Users' },
-  { id: '14', name: 'Mākslas radīšana', value: 1, category: 'healthy', icon: 'Camera' },
-  { id: '15', name: 'Mīļums no bērniem', value: 1, category: 'healthy', icon: 'Users' },
-  { id: '16', name: 'Mūzika', value: 1, category: 'healthy', icon: 'Music' },
-  { id: '17', name: 'Dziļas sarunas', value: 0.5, category: 'healthy', icon: 'MessageSquare' },
-  { id: '18', name: 'Ceļošana', value: 0.1, category: 'healthy', icon: 'Sun' },
-  { id: '19', name: 'Alkohols', value: 15, category: 'unhealthy', icon: 'Beer' },
-  { id: '20', name: 'Kofeīns', value: 8, category: 'neutral', icon: 'Coffee' },
-  { id: '21', name: 'Iepirkšanās', value: 7, category: 'neutral', icon: 'ShoppingCart' },
-  { id: '22', name: 'Azartspēles', value: 12, category: 'unhealthy', icon: 'Dices' },
-  { id: '23', name: 'Pastaigas dabā', value: 4, category: 'healthy', icon: 'Trees' },
-  { id: '24', name: 'Grāmatu lasīšana', value: 3, category: 'healthy', icon: 'BookOpen' },
-  { id: '25', name: 'Auksta duša', value: 5, category: 'healthy', icon: 'Thermometer' },
-  { id: '26', name: 'Kvalitatīvs miegs', value: 10, category: 'healthy', icon: 'Moon' },
-  { id: '27', name: 'Veselīgs uzturs', value: 6, category: 'healthy', icon: 'Apple' },
-  { id: '28', name: 'Darba pabeigšana', value: 8, category: 'healthy', icon: 'CheckCircle' },
-  { id: '29', name: 'Atzinība no citiem', value: 4, category: 'neutral', icon: 'Award' },
-  { id: '30', name: 'TikTok/Reels', value: 18, category: 'unhealthy', icon: 'Smartphone' },
-  { id: '31', name: 'Saldējums/Čipsi', value: 10, category: 'unhealthy', icon: 'Utensils' },
-  { id: '32', name: 'Pastaiga ar suni', value: 5, category: 'healthy', icon: 'Heart' },
-  { id: '33', name: 'Dārza darbi', value: 4, category: 'healthy', icon: 'Trees' },
-  { id: '34', name: 'Mācīšanās/Kursi', value: 6, category: 'healthy', icon: 'Book' },
-  { id: '35', name: 'Sēdēšana pie datora', value: 12, category: 'neutral', icon: 'Tv' },
-  { id: '36', name: 'Zīmēšana/Hobijs', value: 4, category: 'healthy', icon: 'Camera' },
-  { id: '37', name: 'Enerģijas dzērieni', value: 15, category: 'unhealthy', icon: 'Zap' },
-  { id: '38', name: 'Auksta duša (Wim Hof)', value: 8, category: 'healthy', icon: 'Thermometer' },
-  { id: '39', name: 'Kvalitatīvs sekss', value: 12, category: 'healthy', icon: 'Heart' },
-  { id: '40', name: 'Iepirkšanās (impulsu)', value: 10, category: 'unhealthy', icon: 'ShoppingCart' },
+  { id: '1', name: 'Programmēšana', value: 10, category: 'healthy', icon: 'Code' },
+  { id: '2', name: 'Mākslas radīšana', value: 1, category: 'healthy', icon: 'Palette' },
+  { id: '3', name: 'Porn', value: 10, category: 'unhealthy', icon: 'Flame' },
+  { id: '4', name: 'Nikotīns', value: 20, category: 'unhealthy', icon: 'Cigarette' },
+  { id: '5', name: 'Weed', value: 10, category: 'unhealthy', icon: 'Wind' },
+  { id: '6', name: 'Fiziska tuvība/sex', value: 5, category: 'healthy', icon: 'Heart' },
+  { id: '7', name: 'Saldumi', value: 20, category: 'unhealthy', icon: 'Coffee' },
+  { id: '8', name: 'Video spēles', value: 5, category: 'neutral', icon: 'Gamepad2' },
+  { id: '9', name: 'YouTube/Twitter', value: 15, category: 'unhealthy', icon: 'Smartphone' },
+  { id: '10', name: 'Connection ar human', value: 2, category: 'healthy', icon: 'Users' },
+  { id: '11', name: 'Meditācija', value: 3, category: 'healthy', icon: 'Zap' },
+  { id: '12', name: 'Dziļas sarunas', value: 0.5, category: 'healthy', icon: 'MessageSquare' },
+  { id: '13', name: 'Ēdiens', value: 5, category: 'neutral', icon: 'Utensils' },
+  { id: '14', name: 'Ceļošana', value: 0, category: 'healthy', icon: 'Sun' },
+  { id: '15', name: 'Piedzīvojumi', value: 0, category: 'healthy', icon: 'Trophy' },
+  { id: '16', name: 'Mīļums no bērniem', value: 1, category: 'healthy', icon: 'Users' },
+  { id: '17', name: 'Mīļums no sievas', value: 5, category: 'healthy', icon: 'Heart' },
+  { id: '18', name: 'Mūzika', value: 1, category: 'healthy', icon: 'Music' },
+  { id: '19', name: 'Gym & fitness', value: 10, category: 'healthy', icon: 'Dumbbell' },
 ];
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -69,7 +48,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Gamepad2, Beer, Tv, Music, Camera, HeartPulse, Users, Star, Book, Flame, Smile,
   Heart, Utensils, Wind, Moon, Sun, Code, ShoppingCart, MessageSquare,
   Dices, Trees, BookOpen, Thermometer, Apple, CheckCircle, Award,
-  Search, Settings, Sparkles, Trophy, Target
+  Search, Settings, Sparkles, Trophy, Target, Palette
 };
 
 export default function App() {
@@ -139,6 +118,12 @@ export default function App() {
 
   const removeSource = (id: string) => {
     setSources(sources.filter(s => s.id !== id));
+  };
+
+  const resetToDefaults = () => {
+    if (confirm('Vai tiešām vēlaties atiestatīt visus avotus uz noklusējuma vērtībām? Pašreizējās izmaiņas tiks dzēstas.')) {
+      setSources(DEFAULT_SOURCES);
+    }
   };
 
   const saveSnapshot = () => {
@@ -482,7 +467,16 @@ export default function App() {
             >
               <div className="flex justify-between items-end mb-2">
                 <h2 className="text-sm font-bold uppercase tracking-widest text-white/60">Dopamīna Avoti</h2>
-                <span className="text-[10px] text-white/40">{sources.length} avoti</span>
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={resetToDefaults}
+                    className="text-[10px] text-white/20 hover:text-white/60 flex items-center gap-1 transition-colors uppercase font-black"
+                  >
+                    <RotateCcw size={10} />
+                    Atiestatīt
+                  </button>
+                  <span className="text-[10px] text-white/40">{sources.length} avoti</span>
+                </div>
               </div>
 
               <div className="space-y-3">
