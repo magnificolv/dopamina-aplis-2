@@ -67,7 +67,12 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  const selectedSource = useMemo(() => 
+    sources.find(s => s.id === selectedId), 
+  [sources, selectedId]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -249,110 +254,108 @@ export default function App() {
               className="flex flex-col items-center w-full h-full justify-center"
             >
               {/* 3D Container */}
-              <div className="relative w-full aspect-square max-w-[min(90vw,440px)] perspective-2000">
+              <div className="relative w-full aspect-square max-w-[min(90vw,440px)] perspective-2000 flex items-center justify-center">
                 <motion.div 
                   drag
                   dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                   dragElastic={0.1}
                   onDrag={(e, info) => {
-                    setRotation(prev => prev + info.delta.x * 0.5);
-                    setTilt(prev => Math.min(Math.max(prev - info.delta.y * 0.5, -45), 45));
+                    setRotation(prev => prev + info.delta.x * 0.4);
+                    setTilt(prev => Math.min(Math.max(prev - info.delta.y * 0.4, -30), 30));
                   }}
                   style={{ 
                     rotateY: rotation, 
                     rotateX: tilt,
-                    scale: zoom
+                    scale: zoom,
+                    transformStyle: 'preserve-3d'
                   }}
-                  className="w-full h-full relative preserve-3d cursor-grab active:cursor-grabbing"
+                  className="w-full h-full relative flex items-center justify-center cursor-grab active:cursor-grabbing"
                 >
-                  {/* Brain Center with Dynamic Glow */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none brain-animate">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-blue-600/40 blur-[30px] md:blur-[50px] rounded-full scale-[2] md:scale-[2.5] animate-pulse" />
-                      <div className="absolute inset-0 bg-purple-600/30 blur-[50px] md:blur-[80px] rounded-full scale-[2.5] md:scale-[3.5]" />
-                      <div className="absolute inset-0 bg-white/10 blur-[15px] md:blur-[20px] rounded-full scale-[1.2] md:scale-[1.5]" />
-                      <Brain size={isMobile ? 80 : 120} className="text-white relative z-10 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
-                    </div>
-                    <div className="mt-4 md:mt-6 text-center transform translate-z-[50px]">
-                      <motion.span 
-                        key={healthScore}
-                        initial={{ scale: 0.5, opacity: 0, y: 10 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        className={cn(
-                          "text-6xl md:text-8xl font-black tracking-tighter block leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]",
-                          healthScore > 60 ? "text-healthy" : healthScore > 30 ? "text-neutral" : "text-unhealthy"
+                  {/* Brain Center - Stabilized (not rotating with the ring's X/Y tilt for readability) */}
+                  <div 
+                    className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none"
+                    style={{ transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg) translateZ(50px)` }}
+                  >
+                    <div className="relative flex flex-col items-center">
+                      <div className="absolute inset-0 bg-blue-600/20 blur-[40px] rounded-full scale-[2.5] animate-pulse" />
+                      
+                      <AnimatePresence mode="wait">
+                        {selectedSource ? (
+                          <motion.div
+                            key="selected"
+                            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                            className="flex flex-col items-center"
+                          >
+                            <div className={cn(
+                              "p-3 rounded-2xl mb-2 border backdrop-blur-md",
+                              selectedSource.category === 'healthy' ? "bg-healthy/20 border-healthy/40 text-healthy" :
+                              selectedSource.category === 'neutral' ? "bg-neutral/20 border-neutral/40 text-neutral" :
+                              "bg-unhealthy/20 border-unhealthy/40 text-unhealthy"
+                            )}>
+                              {React.createElement(ICON_MAP[selectedSource.icon] || Star, { size: 32 })}
+                            </div>
+                            <span className="text-sm font-black uppercase tracking-widest text-white text-center px-4 drop-shadow-lg">
+                              {selectedSource.name}
+                            </span>
+                            <span className="text-xs font-bold text-white/40 mt-1">
+                              {((selectedSource.value / totalValue) * 100).toFixed(1)}%
+                            </span>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="total"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="flex flex-col items-center"
+                          >
+                            <Brain size={isMobile ? 60 : 80} className="text-white/80 mb-2 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]" />
+                            <span className={cn(
+                              "text-6xl md:text-7xl font-black tracking-tighter block leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]",
+                              healthScore > 60 ? "text-healthy" : healthScore > 30 ? "text-neutral" : "text-unhealthy"
+                            )}>
+                              {healthScore}%
+                            </span>
+                            <p className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black mt-1">Neuro-Index</p>
+                          </motion.div>
                         )}
-                      >
-                        {healthScore}%
-                      </motion.span>
-                      <p className="text-[10px] md:text-[12px] uppercase tracking-[0.5em] text-white/50 font-black mt-1 md:mt-2">Neuro-Index</p>
+                      </AnimatePresence>
                     </div>
                   </div>
 
-                  {/* The Ring - Rotated and Styled */}
-                  <div className="absolute inset-0 flex items-center justify-center transform rotateX(75deg) ring-shadow">
+                  {/* The Ring */}
+                  <div className="absolute inset-0 flex items-center justify-center transform rotateX(65deg)">
                     <div className="w-full h-full relative preserve-3d">
-                      {/* Depth Layers - Simplified for mobile */}
-                      {!isMobile && (
-                        <>
-                          <div className="absolute inset-0 transform translate-z-[-20px] opacity-20 blur-md scale-[1.05]">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart>
-                                <Pie data={chartData} cx="50%" cy="50%" innerRadius={120} outerRadius={190} dataKey="value" stroke="none">
-                                  {chartData.map((entry, index) => (
-                                    <Cell key={`cell-shadow-deep-${index}`} fill={CATEGORY_COLORS[entry.category]} />
-                                  ))}
-                                </Pie>
-                              </PieChart>
-                            </ResponsiveContainer>
-                          </div>
-
-                          <div className="absolute inset-0 transform translate-z-[-10px] opacity-40 blur-sm">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart>
-                                <Pie data={chartData} cx="50%" cy="50%" innerRadius={115} outerRadius={185} dataKey="value" stroke="none">
-                                  {chartData.map((entry, index) => (
-                                    <Cell key={`cell-shadow-${index}`} fill={CATEGORY_COLORS[entry.category]} />
-                                  ))}
-                                </Pie>
-                              </PieChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </>
-                      )}
-
                       {/* Main Ring */}
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                          <defs>
-                            <filter id="glow">
-                              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                              <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                          </defs>
                           <Pie
                             data={chartData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={isMobile ? 80 : 110}
-                            outerRadius={isMobile ? 130 : 180}
-                            paddingAngle={1}
+                            innerRadius={isMobile ? 90 : 120}
+                            outerRadius={isMobile ? 140 : 190}
+                            paddingAngle={2}
                             dataKey="value"
-                            stroke="rgba(255,255,255,0.2)"
+                            stroke="rgba(255,255,255,0.1)"
                             strokeWidth={1}
                             isAnimationActive={!isMobile}
-                            animationDuration={1500}
+                            onClick={(data) => {
+                              const id = data?.payload?.id;
+                              if (id) {
+                                setSelectedId(selectedId === id ? null : id);
+                              }
+                            }}
                           >
                             {chartData.map((entry, index) => (
                               <Cell 
                                 key={`cell-${index}`} 
                                 fill={CATEGORY_COLORS[entry.category]} 
-                                fillOpacity={0.8}
-                                filter={isMobile ? "none" : "url(#glow)"}
-                                className="transition-all duration-500 hover:fill-opacity-100 cursor-pointer"
+                                fillOpacity={selectedId ? (selectedId === entry.id ? 1 : 0.2) : 0.6}
+                                className="transition-all duration-300 cursor-pointer outline-none"
+                                style={{ filter: selectedId === entry.id ? 'brightness(1.2) saturate(1.2)' : 'none' }}
                               />
                             ))}
                           </Pie>
@@ -362,81 +365,99 @@ export default function App() {
                       {/* Floating Icons on the Ring */}
                       {chartData.map((source, index) => {
                         const Icon = ICON_MAP[source.icon] || Star;
-                        // Calculate angle for the icon (center of the slice)
                         let cumulativeValue = 0;
                         for (let i = 0; i < index; i++) cumulativeValue += chartData[i].value;
                         const angle = ((cumulativeValue + source.value / 2) / totalValue) * 360 - 90;
-                        const radius = isMobile ? 105 : 145;
+                        const radius = isMobile ? 115 : 155;
                         const x = Math.cos((angle * Math.PI) / 180) * radius;
                         const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+                        const isSelected = selectedId === source.id;
 
                         return (
                           <div 
                             key={`icon-${source.id}`}
                             className="absolute left-1/2 top-1/2 pointer-events-none"
                             style={{
-                              transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotateX(-75deg) rotateY(${-rotation}deg) scale(${1/zoom})`,
-                              transformStyle: 'preserve-3d'
+                              transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotateX(-65deg) rotateY(${-rotation}deg) scale(${isSelected ? 1.2 : 1})`,
+                              transformStyle: 'preserve-3d',
+                              zIndex: isSelected ? 50 : 10
                             }}
                           >
-                            <div className="flex flex-col items-center gap-1">
+                            <div className={cn(
+                              "flex flex-col items-center gap-1 transition-all duration-300",
+                              selectedId && !isSelected ? "opacity-20 scale-75" : "opacity-100"
+                            )}>
                               <div className={cn(
-                                "p-1 rounded-full bg-black/40 backdrop-blur-md border border-white/20 shadow-lg",
-                                source.category === 'healthy' ? "text-healthy" : source.category === 'neutral' ? "text-neutral" : "text-unhealthy"
+                                "p-2 rounded-full backdrop-blur-md border shadow-xl",
+                                source.category === 'healthy' ? "bg-healthy/40 border-healthy/20 text-white" : 
+                                source.category === 'neutral' ? "bg-neutral/40 border-neutral/20 text-white" : 
+                                "bg-unhealthy/40 border-unhealthy/20 text-white",
+                                isSelected && "ring-4 ring-white/20 scale-110"
                               )}>
-                                <Icon size={isMobile ? 10 : 14} />
+                                <Icon size={isMobile ? 12 : 16} />
                               </div>
-                              <span className={cn(
-                                "text-[8px] md:text-[9px] font-black tabular-nums px-1 rounded bg-black/60 backdrop-blur-sm border border-white/5",
-                                source.category === 'healthy' ? "text-healthy" : source.category === 'neutral' ? "text-neutral" : "text-unhealthy"
-                              )}>
-                                {source.percentage.toFixed(0)}%
-                              </span>
+                              {(!selectedId || isSelected) && (
+                                <span className="text-[10px] font-black tabular-nums text-white drop-shadow-md bg-black/40 px-1 rounded">
+                                  {source.percentage.toFixed(0)}%
+                                </span>
+                              )}
                             </div>
                           </div>
                         );
                       })}
-
-                      {/* Inner Glow Ring */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className={cn(
-                          "rounded-full border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)]",
-                          isMobile ? "w-[160px] h-[160px]" : "w-[220px] h-[220px]"
-                        )} />
-                      </div>
                     </div>
                   </div>
 
-                  {/* Reflection/Floor */}
-                  <div className="absolute bottom-[-100px] md:bottom-[-150px] left-1/2 -translate-x-1/2 w-[140%] h-[40px] md:h-[60px] bg-blue-500/10 blur-[80px] md:blur-[120px] rounded-[100%] transform translate-z-[-300px]" />
+                  {/* Floor Glow */}
+                  <div className="absolute bottom-[-80px] left-1/2 -translate-x-1/2 w-[120%] h-[40px] bg-blue-500/5 blur-[60px] rounded-[100%] transform translate-z-[-200px]" />
                 </motion.div>
                 
-                {/* Visual Hint & Zoom Control */}
-                <div className="absolute -bottom-12 md:-bottom-16 left-0 right-0 flex flex-col items-center gap-3 md:gap-4">
-                  <div className="flex items-center gap-4 w-full px-8">
+                {/* Controls Overlay */}
+                <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-4 z-50">
+                  <div className="flex items-center gap-6 bg-black/40 backdrop-blur-xl px-6 py-3 rounded-full border border-white/10 shadow-2xl">
                     <button 
                       onClick={() => setIsSpinning(!isSpinning)}
                       className={cn(
                         "p-2 rounded-full transition-all",
-                        isSpinning ? "bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]" : "bg-white/5 text-white/40"
+                        isSpinning ? "bg-blue-500 text-white" : "bg-white/10 text-white/40"
                       )}
                     >
-                      <Sparkles size={14} className={isSpinning ? "animate-spin" : ""} />
+                      <Sparkles size={16} className={isSpinning ? "animate-spin" : ""} />
                     </button>
-                    <span className="text-[9px] text-white/20 font-black">ZOOM</span>
-                    <input 
-                      type="range" 
-                      min="0.5" 
-                      max="1.5" 
-                      step="0.01" 
-                      value={zoom} 
-                      onChange={(e) => setZoom(parseFloat(e.target.value))}
-                      className="flex-1 accent-blue-500/50 h-1 bg-white/5 rounded-full appearance-none cursor-pointer"
-                    />
+                    
+                    <div className="flex items-center gap-3">
+                      <span className="text-[9px] text-white/40 font-black tracking-widest">ZOOM</span>
+                      <input 
+                        type="range" 
+                        min="0.6" 
+                        max="1.4" 
+                        step="0.01" 
+                        value={zoom} 
+                        onChange={(e) => setZoom(parseFloat(e.target.value))}
+                        className="w-24 accent-blue-500 h-1 bg-white/10 rounded-full appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    {selectedId && (
+                      <button 
+                        onClick={() => setSelectedId(null)}
+                        className="p-2 bg-white/10 rounded-full text-white/60 hover:text-white"
+                      >
+                        <RotateCcw size={16} />
+                      </button>
+                    )}
                   </div>
-                  <div className="text-[9px] text-white/20 uppercase tracking-[0.4em] md:tracking-[0.6em] flex items-center gap-4 md:gap-6 font-black">
-                    <span className="animate-bounce">←</span> velc, lai rotētu <span className="animate-bounce">→</span>
-                  </div>
+                  
+                  {!selectedId && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-[10px] text-white/20 uppercase tracking-[0.4em] font-black flex items-center gap-2"
+                    >
+                      <span>uzspied uz segmenta, lai uzzinātu vairāk</span>
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </motion.div>
