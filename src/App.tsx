@@ -366,11 +366,19 @@ export default function App() {
                               transformStyle: 'preserve-3d'
                             }}
                           >
-                            <div className={cn(
-                              "p-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 shadow-lg",
-                              source.category === 'healthy' ? "text-healthy" : source.category === 'neutral' ? "text-neutral" : "text-unhealthy"
-                            )}>
-                              <Icon size={14} />
+                            <div className="flex flex-col items-center gap-1">
+                              <div className={cn(
+                                "p-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 shadow-lg",
+                                source.category === 'healthy' ? "text-healthy" : source.category === 'neutral' ? "text-neutral" : "text-unhealthy"
+                              )}>
+                                <Icon size={14} />
+                              </div>
+                              <span className={cn(
+                                "text-[9px] font-black tabular-nums px-1 rounded bg-black/60 backdrop-blur-sm border border-white/5",
+                                source.category === 'healthy' ? "text-healthy" : source.category === 'neutral' ? "text-neutral" : "text-unhealthy"
+                              )}>
+                                {source.percentage.toFixed(0)}%
+                              </span>
                             </div>
                           </div>
                         );
@@ -447,7 +455,6 @@ export default function App() {
                               style={{ color: CATEGORY_COLORS[source.category] }} 
                             />
                           </div>
-                          <span className="text-[10px] text-white/50 font-black tabular-nums">{source.percentage.toFixed(1)}%</span>
                         </div>
                       </div>
                     </motion.div>
