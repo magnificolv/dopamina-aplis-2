@@ -9,38 +9,39 @@ import {
   HeartPulse, Users, Star, Info, X, Heart, Utensils,
   Wind, Moon, Sun, Code, ShoppingCart, MessageSquare,
   Dices, Trees, BookOpen, Thermometer, Apple, CheckCircle, Award,
-  Search, Settings, Sparkles, Trophy, Target, RotateCcw, Palette
+  Search, Settings, Sparkles, Trophy, Target, RotateCcw, Palette,
+  Box, Download, Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DopamineSource, Category, Snapshot } from './types';
 import { cn } from './lib/utils';
 
 const CATEGORY_COLORS = {
-  healthy: '#22c55e',
-  neutral: '#eab308',
-  unhealthy: '#ef4444',
+  healthy: '#10b981',
+  neutral: '#f59e0b',
+  unhealthy: '#f43f5e',
 };
 
 const DEFAULT_SOURCES: DopamineSource[] = [
-  { id: '1', name: 'Programmēšana', value: 10, category: 'healthy', icon: 'Code' },
-  { id: '2', name: 'Mākslas radīšana', value: 1, category: 'healthy', icon: 'Palette' },
-  { id: '3', name: 'Porn', value: 10, category: 'unhealthy', icon: 'Flame' },
-  { id: '4', name: 'Nikotīns', value: 20, category: 'unhealthy', icon: 'Cigarette' },
-  { id: '5', name: 'Weed', value: 10, category: 'unhealthy', icon: 'Wind' },
-  { id: '6', name: 'Fiziska tuvība/sex', value: 5, category: 'healthy', icon: 'Heart' },
-  { id: '7', name: 'Saldumi', value: 20, category: 'unhealthy', icon: 'Coffee' },
-  { id: '8', name: 'Video spēles', value: 5, category: 'neutral', icon: 'Gamepad2' },
-  { id: '9', name: 'YouTube/Twitter', value: 15, category: 'unhealthy', icon: 'Smartphone' },
-  { id: '10', name: 'Connection ar human', value: 2, category: 'healthy', icon: 'Users' },
+  { id: '1', name: 'Programmēšana', value: 15, category: 'healthy', icon: 'Code' },
+  { id: '2', name: 'Mākslas radīšana', value: 5, category: 'healthy', icon: 'Palette' },
+  { id: '3', name: 'Pornogrāfija', value: 10, category: 'unhealthy', icon: 'Flame' },
+  { id: '4', name: 'Nikotīns', value: 10, category: 'unhealthy', icon: 'Cigarette' },
+  { id: '5', name: 'Marihuāna', value: 5, category: 'unhealthy', icon: 'Wind' },
+  { id: '6', name: 'Sekss / Tuvība', value: 10, category: 'healthy', icon: 'Heart' },
+  { id: '7', name: 'Saldumi / Junk Food', value: 10, category: 'unhealthy', icon: 'Coffee' },
+  { id: '8', name: 'Video spēles', value: 8, category: 'neutral', icon: 'Gamepad2' },
+  { id: '9', name: 'Sociālie tīkli', value: 12, category: 'unhealthy', icon: 'Smartphone' },
+  { id: '10', name: 'Cilvēciskais kontakts', value: 5, category: 'healthy', icon: 'Users' },
   { id: '11', name: 'Meditācija', value: 3, category: 'healthy', icon: 'Zap' },
-  { id: '12', name: 'Dziļas sarunas', value: 0.5, category: 'healthy', icon: 'MessageSquare' },
+  { id: '12', name: 'Dziļas sarunas', value: 2, category: 'healthy', icon: 'MessageSquare' },
   { id: '13', name: 'Ēdiens', value: 5, category: 'neutral', icon: 'Utensils' },
-  { id: '14', name: 'Ceļošana', value: 0, category: 'healthy', icon: 'Sun' },
-  { id: '15', name: 'Piedzīvojumi', value: 0, category: 'healthy', icon: 'Trophy' },
-  { id: '16', name: 'Mīļums no bērniem', value: 1, category: 'healthy', icon: 'Users' },
-  { id: '17', name: 'Mīļums no sievas', value: 5, category: 'healthy', icon: 'Heart' },
-  { id: '18', name: 'Mūzika', value: 1, category: 'healthy', icon: 'Music' },
-  { id: '19', name: 'Gym & fitness', value: 10, category: 'healthy', icon: 'Dumbbell' },
+  { id: '14', name: 'Mūzika', value: 5, category: 'healthy', icon: 'Music' },
+  { id: '15', name: 'Sports / Gym', value: 15, category: 'healthy', icon: 'Dumbbell' },
+  { id: '16', name: 'Alkohols', value: 5, category: 'unhealthy', icon: 'Beer' },
+  { id: '17', name: 'TV / Seriāli', value: 5, category: 'neutral', icon: 'Tv' },
+  { id: '18', name: 'Lasīšana', value: 3, category: 'healthy', icon: 'BookOpen' },
+  { id: '19', name: 'Miegs', value: 10, category: 'healthy', icon: 'Moon' },
 ];
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -51,12 +52,26 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Search, Settings, Sparkles, Trophy, Target, Palette
 };
 
+const getIconEmoji = (iconName: string) => {
+  const emojis: Record<string, string> = {
+    Code: '💻', Palette: '🎨', Flame: '🔞', Cigarette: '🚬', Wind: '🍃',
+    Heart: '❤️', Coffee: '🍩', Gamepad2: '🎮', Smartphone: '📱', Users: '👥',
+    Zap: '🧘', MessageSquare: '💬', Utensils: '🍲', Sun: '☀️', Trophy: '🏆',
+    Music: '🎵', Dumbbell: '🏋️', Star: '⭐', Beer: '🍺', Tv: '📺', Camera: '📸',
+    Moon: '🌙', HeartPulse: '💓', Book: '📚', Smile: '😊', ShoppingCart: '🛒', Dices: '🎲',
+    Trees: '🌲', BookOpen: '📖', Thermometer: '🌡️', Apple: '🍎', CheckCircle: '✅',
+    Award: '🥇', Search: '🔍', Settings: '⚙️', Sparkles: '✨', Target: '🎯'
+  };
+  return emojis[iconName] || '✨';
+};
+
 export default function App() {
   const [sources, setSources] = useState<DopamineSource[]>(() => {
     const saved = localStorage.getItem('dopamine-sources');
     return saved ? JSON.parse(saved) : DEFAULT_SOURCES;
   });
   const [view, setView] = useState<'chart' | 'list' | 'history'>('chart');
+  const [is3D, setIs3D] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [tilt, setTilt] = useState(0);
@@ -69,13 +84,18 @@ export default function App() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const selectedSource = useMemo(() => 
     sources.find(s => s.id === selectedId), 
   [sources, selectedId]);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setSidebarOpen(!mobile);
+    };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -135,9 +155,7 @@ export default function App() {
   };
 
   const resetToDefaults = () => {
-    if (confirm('Vai tiešām vēlaties atiestatīt visus avotus uz noklusējuma vērtībām? Pašreizējās izmaiņas tiks dzēstas.')) {
-      setSources(DEFAULT_SOURCES);
-    }
+    setSources(DEFAULT_SOURCES);
   };
 
   const saveSnapshot = () => {
@@ -155,492 +173,521 @@ export default function App() {
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-screen flex flex-col p-4 pb-24 overflow-hidden selection:bg-blue-500/30">
-      {/* Dopamine Rain Background */}
-      <div className="dopamine-rain">
-        {Array.from({ length: isMobile ? 8 : 20 }).map((_, i) => (
+    <div className="min-h-screen bg-[#050816] text-white flex flex-col overflow-hidden selection:bg-blue-500/30 font-sans">
+      {/* Space Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#1a1f35_0%,#050816_100%)]" />
+        {Array.from({ length: 50 }).map((_, i) => (
           <div 
             key={i} 
-            className="dopamine-drop"
+            className="absolute bg-white rounded-full animate-pulse"
             style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-              opacity: 0.1 + Math.random() * 0.2
+              width: Math.random() * 2 + 'px',
+              height: Math.random() * 2 + 'px',
+              left: Math.random() * 100 + '%',
+              top: Math.random() * 100 + '%',
+              opacity: Math.random() * 0.5,
+              animationDelay: Math.random() * 5 + 's',
+              animationDuration: 2 + Math.random() * 3 + 's'
             }}
           />
         ))}
       </div>
 
       {/* Header */}
-      <header className="flex justify-between items-center mb-8 relative z-50">
-        <motion.div
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-        >
-          <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic bg-clip-text text-transparent bg-gradient-to-r from-white to-white/40">
-            Dopamīna Aplis
-          </h1>
-          <p className="text-[10px] text-blue-400 uppercase tracking-[0.4em] font-bold">Neuro-Balance OS</p>
-        </motion.div>
-        <div className="flex gap-2">
+      <header className="relative z-50 flex items-center justify-between px-8 py-6 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+        <div className="flex items-center gap-10">
+          <div className="flex flex-col">
+            <h1 className="text-3xl font-serif italic tracking-tight text-white leading-none">
+              Dopamīna <span className="font-sans font-black uppercase text-[10px] tracking-[0.4em] text-blue-500 ml-2 not-italic">Aplis</span>
+            </h1>
+          </div>
+          
+          <div className="hidden lg:flex items-center gap-2 bg-white/5 p-1 rounded-full border border-white/10">
+            <button 
+              onClick={() => setIs3D(false)}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2",
+                !is3D ? "bg-white text-black shadow-xl" : "text-white/40 hover:text-white/60"
+              )}
+            >
+              <PieIcon size={10} />
+              2D View
+            </button>
+            <button 
+              onClick={() => setIs3D(true)}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2",
+                is3D ? "bg-white text-black shadow-xl" : "text-white/40 hover:text-white/60"
+              )}
+            >
+              <Box size={10} />
+              3D View
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2 mr-4 border-r border-white/10 pr-6">
+            <button 
+              onClick={saveSnapshot}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors group relative"
+              title="Saglabāt"
+            >
+              <Save size={18} className="text-white/60 group-hover:text-blue-400" />
+            </button>
+            <button 
+              className="p-2 hover:bg-white/10 rounded-full transition-colors group relative"
+              title="Eksportēt"
+            >
+              <Download size={18} className="text-white/60 group-hover:text-emerald-400" />
+            </button>
+            <button 
+              className="p-2 hover:bg-white/10 rounded-full transition-colors group relative"
+              title="Importēt"
+            >
+              <Upload size={18} className="text-white/60 group-hover:text-amber-400" />
+            </button>
+          </div>
+          
           <button 
             onClick={() => setShowInfo(true)}
-            className="p-2 glass-panel hover:bg-white/10 transition-all hover:scale-110 active:scale-95"
+            className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all"
           >
-            <Info size={20} className="text-white/60" />
-          </button>
-          <button 
-            onClick={saveSnapshot}
-            className="p-2 glass-panel hover:bg-white/10 transition-all hover:scale-110 active:scale-95"
-            title="Saglabāt momentuzņēmumu"
-          >
-            <Save size={20} className="text-blue-400" />
+            <Info size={18} className="text-white/60" />
           </button>
         </div>
       </header>
 
-      {/* Info Modal */}
+      <div className="flex-1 flex overflow-hidden relative z-10">
+        {/* Main View Area */}
+        <main className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05)_0%,transparent_70%)]">
+          <div className="flex-1 flex flex-col items-center justify-center p-8">
+            <div className="absolute top-6 md:top-12 left-1/2 -translate-x-1/2 text-center w-full px-4">
+              <h2 className="text-4xl md:text-7xl font-serif italic tracking-tighter text-white/90 drop-shadow-2xl">
+                The Balance
+              </h2>
+              <div className="mt-2 flex items-center justify-center gap-4">
+                <div className="h-[1px] w-12 bg-white/10" />
+                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.5em] text-white/30">Dopamine Architecture</span>
+                <div className="h-[1px] w-12 bg-white/10" />
+              </div>
+            </div>
+
+            <div className="relative w-full max-w-5xl aspect-square flex items-center justify-center mt-12 md:mt-20">
+              <AnimatePresence mode="wait">
+                {!is3D ? (
+                  <motion.div
+                    key="2d"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    className="w-full h-full flex items-center justify-center relative"
+                  >
+                    {/* Center Info */}
+                    <div className="absolute z-20 flex flex-col items-center justify-center pointer-events-none">
+                      <div className="relative">
+                        <motion.div
+                          animate={{ 
+                            scale: [1, 1.05, 1],
+                            opacity: [0.5, 0.8, 0.5]
+                          }}
+                          transition={{ duration: 4, repeat: Infinity }}
+                          className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"
+                        />
+                        <div className="w-24 h-24 md:w-40 md:h-40 bg-black/60 backdrop-blur-3xl rounded-full border border-white/10 flex flex-col items-center justify-center shadow-2xl relative z-10">
+                          <div className={cn(
+                            "text-4xl md:text-6xl font-serif italic leading-none",
+                            healthScore > 60 ? "text-healthy" : healthScore > 30 ? "text-neutral" : "text-unhealthy"
+                          )}>
+                            {healthScore}
+                          </div>
+                          <div className="text-[9px] uppercase tracking-[0.3em] text-white/40 font-black mt-2">
+                            Health %
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={chartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={isMobile ? 80 : 180}
+                          outerRadius={isMobile ? 130 : 260}
+                          paddingAngle={4}
+                          cornerRadius={12}
+                          dataKey="value"
+                          stroke="rgba(255,255,255,0.05)"
+                          strokeWidth={1}
+                          isAnimationActive={true}
+                          onClick={(data) => {
+                            const id = data?.payload?.id;
+                            if (id) setSelectedId(selectedId === id ? null : id);
+                          }}
+                          label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index, payload }) => {
+                            const RADIAN = Math.PI / 180;
+                            const radius = outerRadius + (isMobile ? 25 : 40);
+                            const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                            const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                            const isSelected = selectedId === payload.id;
+                            
+                            if (isMobile && payload.percentage < 4 && !isSelected) return null;
+                            if (!isMobile && payload.percentage < 1 && !isSelected) return null;
+
+                            return (
+                              <g>
+                                <text 
+                                  x={x} 
+                                  y={y} 
+                                  fill={isSelected ? "white" : "rgba(255,255,255,0.4)"}
+                                  textAnchor={x > cx ? 'start' : 'end'} 
+                                  dominantBaseline="central"
+                                  className="text-[8px] md:text-[10px] font-serif italic tracking-wider"
+                                >
+                                  {payload.name}
+                                </text>
+                                <text 
+                                  x={x} 
+                                  y={y + (isMobile ? 10 : 14)} 
+                                  fill={CATEGORY_COLORS[payload.category]}
+                                  textAnchor={x > cx ? 'start' : 'end'} 
+                                  dominantBaseline="central"
+                                  className="text-[7px] md:text-[9px] font-black tracking-widest opacity-80"
+                                >
+                                  {payload.percentage.toFixed(1)}%
+                                </text>
+                              </g>
+                            );
+                          }}
+                          labelLine={false}
+                        >
+                          {chartData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={CATEGORY_COLORS[entry.category]} 
+                              fillOpacity={selectedId ? (selectedId === entry.id ? 1 : 0.1) : 0.7}
+                              className="transition-all duration-500 cursor-pointer outline-none hover:fill-opacity-90"
+                              stroke={selectedId === entry.id ? 'white' : 'none'}
+                              strokeWidth={1}
+                            />
+                          ))}
+                        </Pie>
+                        {/* Icons inside segments */}
+                        <Pie
+                          data={chartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={isMobile ? 100 : 210}
+                          outerRadius={isMobile ? 110 : 230}
+                          dataKey="value"
+                          stroke="none"
+                          fill="none"
+                          isAnimationActive={false}
+                          label={({ cx, cy, midAngle, innerRadius, outerRadius, payload }) => {
+                            const RADIAN = Math.PI / 180;
+                            const radius = (innerRadius + outerRadius) / 2;
+                            const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                            const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                            const iconName = payload.icon;
+                            
+                            if (isMobile && payload.percentage < 5 && selectedId !== payload.id) return null;
+                            if (!isMobile && payload.percentage < 3 && selectedId !== payload.id) return null;
+
+                            return (
+                              <text 
+                                x={x} 
+                                y={y} 
+                                textAnchor="middle" 
+                                dominantBaseline="central"
+                                className="text-lg md:text-xl pointer-events-none drop-shadow-lg"
+                              >
+                                {getIconEmoji(iconName)}
+                              </text>
+                            );
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="3d"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="w-full h-full flex items-center justify-center perspective-2000"
+                  >
+                    <motion.div 
+                      drag
+                      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                      onDrag={(e, info) => {
+                        setRotation(prev => prev + info.delta.x * 0.4);
+                        setTilt(prev => Math.min(Math.max(prev - info.delta.y * 0.4, -30), 30));
+                      }}
+                      style={{ 
+                        rotateY: rotation, 
+                        rotateX: tilt,
+                        scale: zoom,
+                        transformStyle: 'preserve-3d'
+                      }}
+                      className="w-full h-full relative flex items-center justify-center cursor-grab active:cursor-grabbing"
+                    >
+                      {/* 3D Content */}
+                      <div className="absolute inset-0 flex items-center justify-center transform rotateX(65deg)">
+                        <div className="w-full h-full relative preserve-3d">
+                          {/* Glow Layer */}
+                          <div className="absolute inset-0 blur-2xl opacity-20 scale-110 pointer-events-none">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie
+                                  data={chartData}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={isMobile ? 80 : 120}
+                                  outerRadius={isMobile ? 130 : 190}
+                                  dataKey="value"
+                                  stroke="none"
+                                  isAnimationActive={false}
+                                >
+                                  {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[entry.category]} />
+                                  ))}
+                                </Pie>
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={chartData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={isMobile ? 80 : 120}
+                                outerRadius={isMobile ? 130 : 190}
+                                dataKey="value"
+                                stroke="rgba(255,255,255,0.1)"
+                                strokeWidth={1}
+                                onClick={(data) => {
+                                  const id = data?.payload?.id;
+                                  if (id) setSelectedId(selectedId === id ? null : id);
+                                }}
+                              >
+                                {chartData.map((entry, index) => (
+                                  <Cell 
+                                    key={`cell-${index}`} 
+                                    fill={CATEGORY_COLORS[entry.category]} 
+                                    fillOpacity={selectedId ? (selectedId === entry.id ? 1 : 0.1) : 0.6}
+                                    className="transition-all duration-500"
+                                  />
+                                ))}
+                              </Pie>
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                      
+                      {/* Stabilized Brain */}
+                      <div 
+                        className="absolute z-30 pointer-events-none"
+                        style={{ transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg) translateZ(80px)` }}
+                      >
+                        <motion.div 
+                          animate={{ 
+                            y: [0, -10, 0],
+                            filter: ["drop-shadow(0 0 10px rgba(59,130,246,0.3))", "drop-shadow(0 0 30px rgba(59,130,246,0.6))", "drop-shadow(0 0 10px rgba(59,130,246,0.3))"]
+                          }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                          className="text-7xl md:text-8xl"
+                        >
+                          🧠
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </main>
+
+        {/* Sidebar */}
+        <aside 
+          className={cn(
+            "w-full md:w-[450px] bg-black/60 backdrop-blur-3xl border-l border-white/5 flex flex-col transition-all duration-500 absolute md:relative inset-y-0 right-0 z-50",
+            !sidebarOpen && "translate-x-full md:translate-x-0 md:w-0 overflow-hidden"
+          )}
+        >
+          <div className="p-8 flex items-center justify-between border-b border-white/5">
+            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/40 flex items-center gap-3">
+              Sources
+              <span className="bg-white/5 px-2 py-0.5 rounded-full text-[9px] border border-white/5">{sources.length}</span>
+            </h3>
+            <button 
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden text-white/40 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+            {sources.map((source) => (
+              <div 
+                key={source.id} 
+                className={cn(
+                  "bg-white/[0.02] border border-white/5 rounded-2xl p-5 transition-all hover:bg-white/[0.05] group relative overflow-hidden",
+                  selectedId === source.id && "ring-1 ring-white/20 bg-white/[0.08]"
+                )}
+                onClick={() => setSelectedId(source.id)}
+              >
+                {selectedId === source.id && (
+                  <motion.div 
+                    layoutId="active-glow"
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent pointer-events-none"
+                  />
+                )}
+                
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="text-2xl w-12 h-12 flex items-center justify-center bg-white/5 rounded-xl border border-white/5">
+                    {getIconEmoji(source.icon)}
+                  </div>
+                  <div className="flex-1">
+                    <input 
+                      type="text"
+                      value={source.name}
+                      onChange={(e) => updateSource(source.id, { name: e.target.value })}
+                      className="bg-transparent border-none outline-none text-sm font-serif italic tracking-wide w-full focus:text-white transition-colors"
+                    />
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className={cn("w-1.5 h-1.5 rounded-full", 
+                        source.category === 'healthy' ? "bg-healthy" : 
+                        source.category === 'neutral' ? "bg-neutral" : "bg-unhealthy"
+                      )} />
+                      <span className="text-[8px] uppercase font-black tracking-widest text-white/30">{source.category}</span>
+                    </div>
+                  </div>
+                  
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); removeSource(source.id); }}
+                    className="opacity-0 group-hover:opacity-100 p-2 text-white/20 hover:text-unhealthy transition-all"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <div className="flex-1 relative h-1 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={false}
+                      animate={{ width: `${source.value}%` }}
+                      className={cn("absolute inset-y-0 left-0 rounded-full", 
+                        source.category === 'healthy' ? "bg-healthy" : 
+                        source.category === 'neutral' ? "bg-neutral" : "bg-unhealthy"
+                      )}
+                    />
+                    <input 
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={source.value}
+                      onChange={(e) => updateSource(source.id, { value: parseFloat(e.target.value) })}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex flex-col items-end min-w-[60px]">
+                    <span className="text-xs font-mono text-white/80">{source.value.toFixed(1)}</span>
+                    <span className="text-[9px] font-black text-white/20 uppercase tracking-tighter">
+                      {((source.value / totalValue) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <button 
+              onClick={addSource}
+              className="w-full py-6 border border-dashed border-white/10 rounded-2xl flex items-center justify-center gap-3 text-white/20 hover:text-white/40 hover:border-white/20 hover:bg-white/[0.02] transition-all group"
+            >
+              <Plus size={16} className="group-hover:rotate-90 transition-transform duration-500" />
+              <span className="text-[9px] font-black uppercase tracking-[0.3em]">Add New Source</span>
+            </button>
+          </div>
+
+          <div className="p-8 border-t border-white/5 bg-black/40 space-y-4">
+            <div className="flex justify-between text-[9px] uppercase font-black tracking-[0.2em] text-white/20">
+              <span>Total Input</span>
+              <span className="font-mono text-white/40">{totalValue.toFixed(1)}%</span>
+            </div>
+            <div className="flex justify-between text-[9px] uppercase font-black tracking-[0.2em] text-white/20">
+              <span>Normalized</span>
+              <span className="text-healthy font-mono">100.0%</span>
+            </div>
+            
+            <button 
+              onClick={resetToDefaults}
+              className="w-full py-3 text-[8px] uppercase font-black tracking-[0.3em] text-white/20 hover:text-unhealthy transition-colors"
+            >
+              Reset to Defaults
+            </button>
+          </div>
+        </aside>
+
+        {/* Sidebar Toggle Button (Mobile) */}
+        {!sidebarOpen && (
+          <button 
+            onClick={() => setSidebarOpen(true)}
+            className="fixed right-6 bottom-6 z-[60] w-14 h-14 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center md:hidden active:scale-90 transition-all hover:scale-110"
+          >
+            <List size={24} />
+          </button>
+        )}
+      </div>
+
+      {/* Info Modal (Simplified) */}
       <AnimatePresence>
         {showInfo && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md"
           >
             <motion.div 
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="glass-panel p-6 max-w-sm w-full relative"
+              className="bg-[#0a0f25] border border-white/10 p-8 max-w-lg w-full relative rounded-3xl"
             >
               <button 
                 onClick={() => setShowInfo(false)}
-                className="absolute top-4 right-4 text-white/40 hover:text-white"
+                className="absolute top-6 right-6 text-white/40 hover:text-white"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Brain className="text-blue-400" />
-                Kas ir Dopamīna Aplis?
+              <h3 className="text-2xl font-black mb-6 flex items-center gap-3 uppercase tracking-tighter">
+                <Brain className="text-blue-400" size={32} />
+                Dopamīna Balanss
               </h3>
-              <div className="space-y-4 text-sm text-white/70 leading-relaxed">
+              <div className="space-y-6 text-sm text-white/60 leading-relaxed font-medium">
                 <p>
                   Dopamīns ir motivācijas un atlīdzības valūta. Tavs "aplis" vienmēr ir 100% pilns.
                 </p>
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 italic">
+                  "Ja tu izņem 20% (piemēram, atmet smēķēšanu), bet neieliec neko vietā, smadzenes jūtas tukšas un meklē ātru aizvietotāju."
+                </div>
                 <p>
-                  Ja tu izņem 20% (piemēram, atmet smēķēšanu), bet neieliec neko vietā, smadzenes jūtas tukšas un meklē ātru aizvietotāju.
-                </p>
-                <p>
-                  Mērķis ir pakāpeniski aizstāt <span className="text-unhealthy font-bold">kaitīgos</span> avotus ar <span className="text-healthy font-bold">veselīgiem</span>, saglabājot kopējo balansu.
+                  Mērķis ir pakāpeniski aizstāt <span className="text-unhealthy font-bold uppercase tracking-widest">kaitīgos</span> avotus ar <span className="text-healthy font-bold uppercase tracking-widest">veselīgiem</span>, saglabājot kopējo balansu.
                 </p>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Main Content */}
-      <main className="flex-1 relative flex flex-col items-center justify-center">
-        <AnimatePresence mode="wait">
-          {view === 'chart' && (
-            <motion.div
-              key="chart"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ type: "spring", damping: 20, stiffness: 100 }}
-              className="flex flex-col items-center w-full h-full justify-center"
-            >
-              {/* 3D Container */}
-              <div className="relative w-full aspect-square max-w-[min(90vw,440px)] perspective-2000 flex items-center justify-center">
-                <motion.div 
-                  drag
-                  dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                  dragElastic={0.1}
-                  onDrag={(e, info) => {
-                    setRotation(prev => prev + info.delta.x * 0.4);
-                    setTilt(prev => Math.min(Math.max(prev - info.delta.y * 0.4, -30), 30));
-                  }}
-                  style={{ 
-                    rotateY: rotation, 
-                    rotateX: tilt,
-                    scale: zoom,
-                    transformStyle: 'preserve-3d'
-                  }}
-                  className="w-full h-full relative flex items-center justify-center cursor-grab active:cursor-grabbing"
-                >
-                  {/* Brain Center - Stabilized (not rotating with the ring's X/Y tilt for readability) */}
-                  <div 
-                    className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none"
-                    style={{ transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg) translateZ(50px)` }}
-                  >
-                    <div className="relative flex flex-col items-center">
-                      <div className="absolute inset-0 bg-blue-600/20 blur-[40px] rounded-full scale-[2.5] animate-pulse" />
-                      
-                      <AnimatePresence mode="wait">
-                        {selectedSource ? (
-                          <motion.div
-                            key="selected"
-                            initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -10, scale: 0.9 }}
-                            className="flex flex-col items-center"
-                          >
-                            <div className={cn(
-                              "p-3 rounded-2xl mb-2 border backdrop-blur-md",
-                              selectedSource.category === 'healthy' ? "bg-healthy/20 border-healthy/40 text-healthy" :
-                              selectedSource.category === 'neutral' ? "bg-neutral/20 border-neutral/40 text-neutral" :
-                              "bg-unhealthy/20 border-unhealthy/40 text-unhealthy"
-                            )}>
-                              {React.createElement(ICON_MAP[selectedSource.icon] || Star, { size: 32 })}
-                            </div>
-                            <span className="text-sm font-black uppercase tracking-widest text-white text-center px-4 drop-shadow-lg">
-                              {selectedSource.name}
-                            </span>
-                            <span className="text-xs font-bold text-white/40 mt-1">
-                              {((selectedSource.value / totalValue) * 100).toFixed(1)}%
-                            </span>
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="total"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            className="flex flex-col items-center"
-                          >
-                            <Brain size={isMobile ? 60 : 80} className="text-white/80 mb-2 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]" />
-                            <span className={cn(
-                              "text-6xl md:text-7xl font-black tracking-tighter block leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]",
-                              healthScore > 60 ? "text-healthy" : healthScore > 30 ? "text-neutral" : "text-unhealthy"
-                            )}>
-                              {healthScore}%
-                            </span>
-                            <p className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black mt-1">Neuro-Index</p>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {/* The Ring */}
-                  <div className="absolute inset-0 flex items-center justify-center transform rotateX(65deg)">
-                    <div className="w-full h-full relative preserve-3d">
-                      {/* Main Ring */}
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={chartData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={isMobile ? 90 : 120}
-                            outerRadius={isMobile ? 140 : 190}
-                            paddingAngle={2}
-                            dataKey="value"
-                            stroke="rgba(255,255,255,0.1)"
-                            strokeWidth={1}
-                            isAnimationActive={!isMobile}
-                            onClick={(data) => {
-                              const id = data?.payload?.id;
-                              if (id) {
-                                setSelectedId(selectedId === id ? null : id);
-                              }
-                            }}
-                          >
-                            {chartData.map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={CATEGORY_COLORS[entry.category]} 
-                                fillOpacity={selectedId ? (selectedId === entry.id ? 1 : 0.2) : 0.6}
-                                className="transition-all duration-300 cursor-pointer outline-none"
-                                style={{ filter: selectedId === entry.id ? 'brightness(1.2) saturate(1.2)' : 'none' }}
-                              />
-                            ))}
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-
-                      {/* Floating Icons on the Ring */}
-                      {chartData.map((source, index) => {
-                        const Icon = ICON_MAP[source.icon] || Star;
-                        let cumulativeValue = 0;
-                        for (let i = 0; i < index; i++) cumulativeValue += chartData[i].value;
-                        const angle = ((cumulativeValue + source.value / 2) / totalValue) * 360 - 90;
-                        const radius = isMobile ? 115 : 155;
-                        const x = Math.cos((angle * Math.PI) / 180) * radius;
-                        const y = Math.sin((angle * Math.PI) / 180) * radius;
-
-                        const isSelected = selectedId === source.id;
-
-                        return (
-                          <div 
-                            key={`icon-${source.id}`}
-                            className="absolute left-1/2 top-1/2 pointer-events-none"
-                            style={{
-                              transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotateX(-65deg) rotateY(${-rotation}deg) scale(${isSelected ? 1.2 : 1})`,
-                              transformStyle: 'preserve-3d',
-                              zIndex: isSelected ? 50 : 10
-                            }}
-                          >
-                            <div className={cn(
-                              "flex flex-col items-center gap-1 transition-all duration-300",
-                              selectedId && !isSelected ? "opacity-20 scale-75" : "opacity-100"
-                            )}>
-                              <div className={cn(
-                                "p-2 rounded-full backdrop-blur-md border shadow-xl",
-                                source.category === 'healthy' ? "bg-healthy/40 border-healthy/20 text-white" : 
-                                source.category === 'neutral' ? "bg-neutral/40 border-neutral/20 text-white" : 
-                                "bg-unhealthy/40 border-unhealthy/20 text-white",
-                                isSelected && "ring-4 ring-white/20 scale-110"
-                              )}>
-                                <Icon size={isMobile ? 12 : 16} />
-                              </div>
-                              {(!selectedId || isSelected) && (
-                                <span className="text-[10px] font-black tabular-nums text-white drop-shadow-md bg-black/40 px-1 rounded">
-                                  {source.percentage.toFixed(0)}%
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Floor Glow */}
-                  <div className="absolute bottom-[-80px] left-1/2 -translate-x-1/2 w-[120%] h-[40px] bg-blue-500/5 blur-[60px] rounded-[100%] transform translate-z-[-200px]" />
-                </motion.div>
-                
-                {/* Controls Overlay */}
-                <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-4 z-50">
-                  <div className="flex items-center gap-6 bg-black/40 backdrop-blur-xl px-6 py-3 rounded-full border border-white/10 shadow-2xl">
-                    <button 
-                      onClick={() => setIsSpinning(!isSpinning)}
-                      className={cn(
-                        "p-2 rounded-full transition-all",
-                        isSpinning ? "bg-blue-500 text-white" : "bg-white/10 text-white/40"
-                      )}
-                    >
-                      <Sparkles size={16} className={isSpinning ? "animate-spin" : ""} />
-                    </button>
-                    
-                    <div className="flex items-center gap-3">
-                      <span className="text-[9px] text-white/40 font-black tracking-widest">ZOOM</span>
-                      <input 
-                        type="range" 
-                        min="0.6" 
-                        max="1.4" 
-                        step="0.01" 
-                        value={zoom} 
-                        onChange={(e) => setZoom(parseFloat(e.target.value))}
-                        className="w-24 accent-blue-500 h-1 bg-white/10 rounded-full appearance-none cursor-pointer"
-                      />
-                    </div>
-
-                    {selectedId && (
-                      <button 
-                        onClick={() => setSelectedId(null)}
-                        className="p-2 bg-white/10 rounded-full text-white/60 hover:text-white"
-                      >
-                        <RotateCcw size={16} />
-                      </button>
-                    )}
-                  </div>
-                  
-                  {!selectedId && (
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-[10px] text-white/20 uppercase tracking-[0.4em] font-black flex items-center gap-2"
-                    >
-                      <span>uzspied uz segmenta, lai uzzinātu vairāk</span>
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {view === 'list' && (
-            <motion.div
-              key="list"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-4"
-            >
-              <div className="flex justify-between items-end mb-2">
-                <h2 className="text-sm font-bold uppercase tracking-widest text-white/60">Dopamīna Avoti</h2>
-                <div className="flex items-center gap-4">
-                  <button 
-                    onClick={resetToDefaults}
-                    className="text-[10px] text-white/20 hover:text-white/60 flex items-center gap-1 transition-colors uppercase font-black"
-                  >
-                    <RotateCcw size={10} />
-                    Atiestatīt
-                  </button>
-                  <span className="text-[10px] text-white/40">{sources.length} avoti</span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {sources.map((source) => (
-                  <div key={source.id} className="glass-panel p-4 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <select 
-                        value={source.icon}
-                        onChange={(e) => updateSource(source.id, { icon: e.target.value })}
-                        className="bg-white/5 border-none rounded p-1 text-white/60 text-xs"
-                      >
-                        {Object.keys(ICON_MAP).map(iconName => (
-                          <option key={iconName} value={iconName}>{iconName}</option>
-                        ))}
-                      </select>
-                      <input 
-                        type="text"
-                        value={source.name}
-                        onChange={(e) => updateSource(source.id, { name: e.target.value })}
-                        className="bg-transparent border-b border-white/10 focus:border-white/30 outline-none flex-1 text-sm font-medium"
-                      />
-                      <select 
-                        value={source.category}
-                        onChange={(e) => updateSource(source.id, { category: e.target.value as Category })}
-                        className={cn(
-                          "text-[10px] uppercase font-bold px-2 py-1 rounded border-none outline-none",
-                          source.category === 'healthy' ? "bg-healthy/20 text-healthy" :
-                          source.category === 'neutral' ? "bg-neutral/20 text-neutral" :
-                          "bg-unhealthy/20 text-unhealthy"
-                        )}
-                      >
-                        <option value="healthy">Veselīgs</option>
-                        <option value="neutral">Neitrāls</option>
-                        <option value="unhealthy">Kaitīgs</option>
-                      </select>
-                      <button 
-                        onClick={() => removeSource(source.id)}
-                        className="text-white/20 hover:text-unhealthy transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                    
-                    <div className="flex items-center gap-4">
-                      <input 
-                        type="range"
-                        min="1"
-                        max="100"
-                        value={source.value}
-                        onChange={(e) => updateSource(source.id, { value: parseInt(e.target.value) })}
-                        className="flex-1 accent-blue-500 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
-                      />
-                      <div className="flex items-center gap-2 min-w-[60px] justify-end">
-                        <span className="text-xs font-mono">{source.value}</span>
-                        <span className="text-[10px] text-white/40">→ {((source.value / totalValue) * 100).toFixed(1)}%</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button 
-                onClick={addSource}
-                className="w-full py-4 border-2 border-dashed border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white/40 hover:text-white hover:border-white/20 transition-all"
-              >
-                <Plus size={20} />
-                <span className="text-sm font-medium uppercase tracking-widest">Pievienot avotu</span>
-              </button>
-            </motion.div>
-          )}
-
-          {view === 'history' && (
-            <motion.div
-              key="history"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-4"
-            >
-              <h2 className="text-sm font-bold uppercase tracking-widest text-white/60 mb-4">Vēsture & Momentuzņēmumi</h2>
-              
-              {snapshots.length === 0 ? (
-                <div className="glass-panel p-8 text-center text-white/20">
-                  <History size={48} className="mx-auto mb-4 opacity-10" />
-                  <p className="text-sm italic">Vēl nav saglabātu momentuzņēmumu</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {snapshots.map((snap) => (
-                    <div key={snap.id} className="glass-panel p-4 flex justify-between items-center">
-                      <div>
-                        <div className="text-xs text-white/40 mb-1">{snap.date}</div>
-                        <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "text-xl font-bold",
-                            snap.healthScore > 60 ? "text-healthy" : snap.healthScore > 30 ? "text-neutral" : "text-unhealthy"
-                          )}>
-                            {snap.healthScore}%
-                          </span>
-                          <span className="text-[10px] uppercase tracking-widest text-white/20">Veselība</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => setSources(snap.sources)}
-                          className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-xs uppercase tracking-widest font-bold"
-                        >
-                          Atjaunot
-                        </button>
-                        <button 
-                          onClick={() => deleteSnapshot(snap.id)}
-                          className="p-2 text-white/20 hover:text-unhealthy transition-colors"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-
-      {/* Navigation */}
-      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass-panel p-2 flex justify-around items-center z-50">
-        <button 
-          onClick={() => setView('chart')}
-          className={cn(
-            "flex flex-col items-center gap-1 p-2 rounded-xl transition-all flex-1",
-            view === 'chart' ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"
-          )}
-        >
-          <PieIcon size={20} />
-          <span className="text-[9px] uppercase font-bold tracking-widest">Aplis</span>
-        </button>
-        <button 
-          onClick={() => setView('list')}
-          className={cn(
-            "flex flex-col items-center gap-1 p-2 rounded-xl transition-all flex-1",
-            view === 'list' ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"
-          )}
-        >
-          <List size={20} />
-          <span className="text-[9px] uppercase font-bold tracking-widest">Avoti</span>
-        </button>
-        <button 
-          onClick={() => setView('history')}
-          className={cn(
-            "flex flex-col items-center gap-1 p-2 rounded-xl transition-all flex-1",
-            view === 'history' ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"
-          )}
-        >
-          <History size={20} />
-          <span className="text-[9px] uppercase font-bold tracking-widest">Vēsture</span>
-        </button>
-      </nav>
     </div>
   );
 }
