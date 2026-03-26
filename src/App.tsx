@@ -3,7 +3,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip 
 } from 'recharts';
 import { 
-  Plus, Trash2, Save, History, PieChart as PieIcon, List, 
+  Plus, Minus, Trash2, Save, History, PieChart as PieIcon, List, 
   Zap, Smile, Coffee, Book, Dumbbell, Gamepad2, Cigarette,
   Beer, Tv, Smartphone, Brain, Flame, Music, Camera,
   HeartPulse, Users, Star, Info, X, Heart, Utensils,
@@ -85,10 +85,31 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [quickUpdateValue, setQuickUpdateValue] = useState('');
+  const [showQuickEdit, setShowQuickEdit] = useState(false);
 
   const selectedSource = useMemo(() => 
     sources.find(s => s.id === selectedId), 
   [sources, selectedId]);
+
+  const handleRelativeUpdate = (id: string, input: string) => {
+    const source = sources.find(s => s.id === id);
+    if (!source) return;
+    
+    let newValue = source.value;
+    const cleanInput = input.trim();
+    if (cleanInput.startsWith('+')) {
+      newValue += parseFloat(cleanInput.substring(1)) || 0;
+    } else if (cleanInput.startsWith('-')) {
+      newValue -= parseFloat(cleanInput.substring(1)) || 0;
+    } else {
+      newValue = parseFloat(cleanInput) || 0;
+    }
+    
+    updateSource(id, { value: Math.max(0, newValue) });
+    setQuickUpdateValue('');
+    setShowQuickEdit(false);
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -434,7 +455,10 @@ export default function App() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="w-full h-full flex items-center justify-center perspective-2000"
+                    className="w-full h-full flex items-center justify-center perspective-2000 overflow-hidden"
+                    onWheel={(e) => {
+                      setZoom(prev => Math.min(Math.max(prev - e.deltaY * 0.001, 0.5), 3));
+                    }}
                   >
                     <motion.div 
                       drag
@@ -476,6 +500,38 @@ export default function App() {
                             </ResponsiveContainer>
                           </div>
 
+                          {/* Depth Layers */}
+                          {[...Array(10)].map((_, i) => (
+                            <div 
+                              key={i}
+                              className="absolute inset-0 pointer-events-none"
+                              style={{ transform: `translateZ(${-i * 2}px)` }}
+                            >
+                              <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                  <Pie
+                                    data={chartData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={isMobile ? 70 : 120}
+                                    outerRadius={isMobile ? 110 : 190}
+                                    dataKey="value"
+                                    stroke="none"
+                                    isAnimationActive={false}
+                                  >
+                                    {chartData.map((entry, index) => (
+                                      <Cell 
+                                        key={`cell-${index}`} 
+                                        fill={CATEGORY_COLORS[entry.category]} 
+                                        fillOpacity={0.2}
+                                      />
+                                    ))}
+                                  </Pie>
+                                </PieChart>
+                              </ResponsiveContainer>
+                            </div>
+                          ))}
+
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
@@ -489,7 +545,10 @@ export default function App() {
                                 strokeWidth={1}
                                 onClick={(data) => {
                                   const id = data?.payload?.id;
-                                  if (id) setSelectedId(selectedId === id ? null : id);
+                                  if (id) {
+                                    setSelectedId(id);
+                                    setShowQuickEdit(true);
+                                  }
                                 }}
                               >
                                 {chartData.map((entry, index) => (
@@ -497,7 +556,7 @@ export default function App() {
                                     key={`cell-${index}`} 
                                     fill={CATEGORY_COLORS[entry.category]} 
                                     fillOpacity={selectedId ? (selectedId === entry.id ? 1 : 0.1) : 0.6}
-                                    className="transition-all duration-500"
+                                    className="transition-all duration-500 cursor-pointer"
                                   />
                                 ))}
                               </Pie>
@@ -522,7 +581,95 @@ export default function App() {
                           🧠
                         </motion.div>
                       </div>
+
+                      {/* Quick Edit Popup */}
+                      <AnimatePresence>
+                        {showQuickEdit && selectedSource && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.5, y: 20 }}
+                            className="absolute z-50 bg-black/80 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl min-w-[200px]"
+                            style={{ 
+                              transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg) translateZ(150px)`,
+                              pointerEvents: 'auto'
+                            }}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">{getIconEmoji(selectedSource.icon)}</span>
+                                <span className="font-medium text-white text-sm truncate max-w-[120px]">
+                                  {selectedSource.name}
+                                </span>
+                              </div>
+                              <button 
+                                onClick={() => setShowQuickEdit(false)}
+                                className="p-1 hover:bg-white/10 rounded-full transition-colors"
+                              >
+                                <X className="w-4 h-4 text-white/50" />
+                              </button>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                              <input
+                                autoFocus
+                                type="text"
+                                placeholder="+1 or -5"
+                                value={quickUpdateValue}
+                                onChange={(e) => setQuickUpdateValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleRelativeUpdate(selectedSource.id, quickUpdateValue);
+                                  }
+                                }}
+                                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                              />
+                              <button
+                                onClick={() => handleRelativeUpdate(selectedSource.id, quickUpdateValue)}
+                                className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div className="mt-2 text-[10px] text-white/40 text-center">
+                              Ievadiet vērtību (piem. +5) un spiediet Enter
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
+
+                    {/* 3D Controls Overlay */}
+                    <div className="absolute bottom-8 right-8 flex flex-col gap-2 z-40">
+                      <div className="bg-black/40 backdrop-blur-md border border-white/10 p-2 rounded-xl flex flex-col gap-2">
+                        <button 
+                          onClick={() => setZoom(prev => Math.min(prev + 0.2, 3))}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                          title="Zoom In"
+                        >
+                          <Plus className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.5))}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                          title="Zoom Out"
+                        >
+                          <Minus className="w-5 h-5" />
+                        </button>
+                        <div className="h-px bg-white/10 mx-2" />
+                        <button 
+                          onClick={() => {
+                            setRotation(0);
+                            setTilt(0);
+                            setZoom(1);
+                          }}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                          title="Reset View"
+                        >
+                          <RotateCcw className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
