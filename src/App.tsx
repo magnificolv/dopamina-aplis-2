@@ -10,9 +10,10 @@ import {
   Wind, Moon, Sun, Code, ShoppingCart, MessageSquare,
   Dices, Trees, BookOpen, Thermometer, Apple, CheckCircle, Award,
   Search, Settings, Sparkles, Trophy, Target, RotateCcw, Palette,
-  Box, Download, Upload, LayoutList
+  Box, Download, Upload, LayoutList, MousePointer2, Maximize2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import * as d3 from 'd3';
 import { DopamineSource, Category, Snapshot } from './types';
 import { cn } from './lib/utils';
 
@@ -87,6 +88,16 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [quickUpdateValue, setQuickUpdateValue] = useState('');
   const [showQuickEdit, setShowQuickEdit] = useState(false);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const totalValue = useMemo(() => sources.reduce((acc, s) => acc + s.value, 0), [sources]);
+
+  const chartData = useMemo(() => {
+    return sources.map(s => ({
+      ...s,
+      percentage: totalValue > 0 ? (s.value / totalValue) * 100 : 0
+    })).sort((a, b) => b.value - a.value);
+  }, [sources, totalValue]);
 
   const selectedSource = useMemo(() => 
     sources.find(s => s.id === selectedId), 
@@ -110,6 +121,22 @@ export default function App() {
     setQuickUpdateValue('');
     setShowQuickEdit(false);
   };
+
+  const pieGenerator = useMemo(() => {
+    return d3.pie<any>()
+      .value(d => d.value)
+      .sort(null);
+  }, []);
+
+  const arcGenerator = useMemo(() => {
+    return d3.arc<any>()
+      .innerRadius(120)
+      .outerRadius(200)
+      .padAngle(0.02)
+      .cornerRadius(4);
+  }, []);
+
+  const pieData = useMemo(() => pieGenerator(chartData), [chartData, pieGenerator]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -139,15 +166,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('dopamine-snapshots', JSON.stringify(snapshots));
   }, [snapshots]);
-
-  const totalValue = useMemo(() => sources.reduce((acc, s) => acc + s.value, 0), [sources]);
-
-  const chartData = useMemo(() => {
-    return sources.map(s => ({
-      ...s,
-      percentage: totalValue > 0 ? (s.value / totalValue) * 100 : 0
-    })).sort((a, b) => b.value - a.value);
-  }, [sources, totalValue]);
 
   const healthScore = useMemo(() => {
     const healthySum = sources
@@ -455,17 +473,51 @@ export default function App() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="w-full h-full flex items-center justify-center perspective-2000 overflow-hidden"
+                    className="w-full h-full flex items-center justify-center perspective-2000 overflow-hidden bg-[#050505]"
                     onWheel={(e) => {
                       setZoom(prev => Math.min(Math.max(prev - e.deltaY * 0.001, 0.5), 3));
                     }}
                   >
+                    {/* Background Stars & Grid */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#050505_70%)] z-10" />
+                      
+                      {/* 3D Grid Floor */}
+                      <div 
+                        className="absolute inset-0 opacity-10"
+                        style={{
+                          backgroundImage: `linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px)`,
+                          backgroundSize: '40px 40px',
+                          transform: 'perspective(1000px) rotateX(60deg) translateY(100px) scale(2)',
+                          maskImage: 'linear-gradient(to bottom, transparent, black)'
+                        }}
+                      />
+
+                      {[...Array(50)].map((_, i) => (
+                        <div 
+                          key={i}
+                          className="absolute bg-white rounded-full animate-pulse"
+                          style={{
+                            width: Math.random() * 2 + 'px',
+                            height: Math.random() * 2 + 'px',
+                            top: Math.random() * 100 + '%',
+                            left: Math.random() * 100 + '%',
+                            boxShadow: '0 0 10px white',
+                            animationDelay: Math.random() * 5 + 's'
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Scanline Effect */}
+                    <div className="absolute inset-0 pointer-events-none z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
+
                     <motion.div 
                       drag
                       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                       onDrag={(e, info) => {
                         setRotation(prev => prev + info.delta.x * 0.4);
-                        setTilt(prev => Math.min(Math.max(prev - info.delta.y * 0.4, -30), 30));
+                        setTilt(prev => Math.min(Math.max(prev - info.delta.y * 0.4, -45), 45));
                       }}
                       style={{ 
                         rotateY: rotation, 
@@ -475,201 +527,286 @@ export default function App() {
                       }}
                       className="w-full h-full relative flex items-center justify-center cursor-grab active:cursor-grabbing"
                     >
-                      {/* 3D Content */}
-                      <div className="absolute inset-0 flex items-center justify-center transform rotateX(65deg)">
-                        <div className="w-full h-full relative preserve-3d">
-                          {/* Glow Layer */}
-                          <div className="absolute inset-0 blur-2xl opacity-20 scale-110 pointer-events-none">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart>
-                                <Pie
-                                  data={chartData}
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius={isMobile ? 70 : 120}
-                                  outerRadius={isMobile ? 110 : 190}
-                                  dataKey="value"
-                                  stroke="none"
-                                  isAnimationActive={false}
-                                >
-                                  {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[entry.category]} />
-                                  ))}
-                                </Pie>
-                              </PieChart>
-                            </ResponsiveContainer>
-                          </div>
+                      {/* 3D Ring Container */}
+                      <div className="relative w-[600px] h-[600px] flex items-center justify-center transform-gpu preserve-3d">
+                        {/* The Ring */}
+                        <svg 
+                          viewBox="-300 -300 600 600" 
+                          className="w-full h-full overflow-visible drop-shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                          style={{ transform: 'rotateX(70deg)' }}
+                        >
+                          <defs>
+                            {chartData.map((d, i) => (
+                              <radialGradient key={`grad-${i}`} id={`grad-${d.id}`} cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor={CATEGORY_COLORS[d.category]} stopOpacity="1" />
+                                <stop offset="100%" stopColor={CATEGORY_COLORS[d.category]} stopOpacity="0.6" />
+                              </radialGradient>
+                            ))}
+                            <filter id="glow">
+                              <feGaussianBlur stdDeviation="3" result="blur" />
+                              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                          </defs>
 
-                          {/* Depth Layers */}
-                          {[...Array(10)].map((_, i) => (
-                            <div 
-                              key={i}
-                              className="absolute inset-0 pointer-events-none"
-                              style={{ transform: `translateZ(${-i * 2}px)` }}
-                            >
-                              <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                  <Pie
-                                    data={chartData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={isMobile ? 70 : 120}
-                                    outerRadius={isMobile ? 110 : 190}
-                                    dataKey="value"
-                                    stroke="none"
-                                    isAnimationActive={false}
-                                  >
-                                    {chartData.map((entry, index) => (
-                                      <Cell 
-                                        key={`cell-${index}`} 
-                                        fill={CATEGORY_COLORS[entry.category]} 
-                                        fillOpacity={0.2}
-                                      />
-                                    ))}
-                                  </Pie>
-                                </PieChart>
-                              </ResponsiveContainer>
-                            </div>
+                          {/* Depth Layers (The "Cake" effect) */}
+                          {[...Array(12)].map((_, layer) => (
+                            <g key={layer} style={{ transform: `translateZ(${-layer * 4}px)` }}>
+                              {pieData.map((d: any, i: number) => {
+                                const isSelected = selectedId === d.data.id;
+                                const isHovered = hoveredId === d.data.id;
+                                const path = arcGenerator(d);
+                                return (
+                                  <motion.path
+                                    key={`${layer}-${d.data.id}`}
+                                    d={path || ''}
+                                    fill={CATEGORY_COLORS[d.data.category as Category]}
+                                    fillOpacity={layer === 0 ? (isSelected ? 1 : 0.8) : 0.3 - (layer * 0.02)}
+                                    stroke="rgba(255,255,255,0.05)"
+                                    strokeWidth={0.5}
+                                    initial={false}
+                                    animate={{
+                                      scale: isSelected || isHovered ? 1.05 : 1,
+                                      translateY: isSelected || isHovered ? -10 : 0
+                                    }}
+                                    className="transition-all duration-300"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedId(d.data.id);
+                                      setShowQuickEdit(true);
+                                    }}
+                                    onMouseEnter={() => setHoveredId(d.data.id)}
+                                    onMouseLeave={() => setHoveredId(null)}
+                                    style={{ cursor: 'pointer', filter: layer === 0 ? 'url(#glow)' : 'none' }}
+                                  />
+                                );
+                              })}
+                            </g>
                           ))}
 
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={chartData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={isMobile ? 70 : 120}
-                                outerRadius={isMobile ? 110 : 190}
-                                dataKey="value"
-                                stroke="rgba(255,255,255,0.1)"
-                                strokeWidth={1}
-                                onClick={(data) => {
-                                  const id = data?.payload?.id;
-                                  if (id) {
-                                    setSelectedId(id);
-                                    setShowQuickEdit(true);
-                                  }
-                                }}
-                              >
-                                {chartData.map((entry, index) => (
-                                  <Cell 
-                                    key={`cell-${index}`} 
-                                    fill={CATEGORY_COLORS[entry.category]} 
-                                    fillOpacity={selectedId ? (selectedId === entry.id ? 1 : 0.1) : 0.6}
-                                    className="transition-all duration-500 cursor-pointer"
-                                  />
-                                ))}
-                              </Pie>
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
-                      
-                      {/* Stabilized Brain */}
-                      <div 
-                        className="absolute z-30 pointer-events-none"
-                        style={{ transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg) translateZ(80px)` }}
-                      >
-                        <motion.div 
-                          animate={{ 
-                            y: [0, -10, 0],
-                            filter: ["drop-shadow(0 0 10px rgba(59,130,246,0.3))", "drop-shadow(0 0 30px rgba(59,130,246,0.6))", "drop-shadow(0 0 10px rgba(59,130,246,0.3))"]
-                          }}
-                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                          className="text-7xl md:text-8xl"
-                        >
-                          🧠
-                        </motion.div>
-                      </div>
+                          {/* Top Surface Icons & Labels */}
+                          <g style={{ transform: 'translateZ(5px)' }}>
+                            {pieData.map((d: any) => {
+                              const [x, y] = arcGenerator.centroid(d);
+                              const isSelected = selectedId === d.data.id;
+                              const isHovered = hoveredId === d.data.id;
+                              if (d.data.percentage < 2 && !isSelected) return null;
 
-                      {/* Quick Edit Popup */}
-                      <AnimatePresence>
-                        {showQuickEdit && selectedSource && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.5, y: 20 }}
-                            className="absolute z-50 bg-black/80 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl min-w-[200px]"
-                            style={{ 
-                              transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg) translateZ(150px)`,
-                              pointerEvents: 'auto'
+                              return (
+                                <motion.g 
+                                  key={`label-${d.data.id}`}
+                                  animate={{
+                                    scale: isSelected || isHovered ? 1.2 : 1,
+                                    opacity: isSelected || isHovered ? 1 : 0.8
+                                  }}
+                                  className="pointer-events-none"
+                                >
+                                  <text
+                                    x={x}
+                                    y={y}
+                                    textAnchor="middle"
+                                    dominantBaseline="central"
+                                    className="text-2xl drop-shadow-md"
+                                    style={{ transform: 'rotateX(-70deg)' }}
+                                  >
+                                    {getIconEmoji(d.data.icon)}
+                                  </text>
+                                  {isSelected && (
+                                    <text
+                                      x={x}
+                                      y={y + 25}
+                                      textAnchor="middle"
+                                      className="text-[10px] font-bold fill-white drop-shadow-md uppercase tracking-widest"
+                                      style={{ transform: 'rotateX(-70deg)' }}
+                                    >
+                                      {Math.round(d.data.percentage)}%
+                                    </text>
+                                  )}
+                                </motion.g>
+                              );
+                            })}
+                          </g>
+                        </svg>
+
+                        {/* Central Brain Core */}
+                        <div className="absolute z-50 pointer-events-none flex flex-col items-center justify-center">
+                          <motion.div 
+                            animate={{ 
+                              scale: [1, 1.1, 1],
+                              rotate: [0, 5, -5, 0],
+                              filter: [
+                                "drop-shadow(0 0 20px rgba(255,100,200,0.4))",
+                                "drop-shadow(0 0 40px rgba(255,100,200,0.7))",
+                                "drop-shadow(0 0 20px rgba(255,100,200,0.4))"
+                              ]
                             }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            className="text-8xl relative"
+                            style={{ transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg)` }}
                           >
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xl">{getIconEmoji(selectedSource.icon)}</span>
-                                <span className="font-medium text-white text-sm truncate max-w-[120px]">
-                                  {selectedSource.name}
-                                </span>
-                              </div>
-                              <button 
-                                onClick={() => setShowQuickEdit(false)}
-                                className="p-1 hover:bg-white/10 rounded-full transition-colors"
-                              >
-                                <X className="w-4 h-4 text-white/50" />
-                              </button>
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <input
-                                autoFocus
-                                type="text"
-                                placeholder="+1 or -5"
-                                value={quickUpdateValue}
-                                onChange={(e) => setQuickUpdateValue(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleRelativeUpdate(selectedSource.id, quickUpdateValue);
-                                  }
-                                }}
-                                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                              />
-                              <button
-                                onClick={() => handleRelativeUpdate(selectedSource.id, quickUpdateValue)}
-                                className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </button>
-                            </div>
-                            <div className="mt-2 text-[10px] text-white/40 text-center">
-                              Ievadiet vērtību (piem. +5) un spiediet Enter
-                            </div>
+                            🧠
+                            <div className="absolute inset-0 bg-pink-500/20 blur-3xl rounded-full -z-10" />
                           </motion.div>
-                        )}
-                      </AnimatePresence>
+                          
+                          <motion.div
+                            style={{ transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg)` }}
+                            className="mt-4 bg-black/60 backdrop-blur-xl border border-white/10 px-4 py-1 rounded-full"
+                          >
+                            <span className="text-white/70 text-xs font-medium tracking-[0.2em] uppercase">
+                              Health: {healthScore}%
+                            </span>
+                          </motion.div>
+                        </div>
+
+                        {/* Quick Edit Popup - Anchored to 3D Space */}
+                        <AnimatePresence>
+                          {showQuickEdit && selectedSource && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.5, y: 50 }}
+                              className="absolute z-[100] bg-[#0a0a0a]/90 backdrop-blur-2xl border border-white/10 p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] min-w-[240px]"
+                              style={{ 
+                                transform: `rotateX(${-tilt}deg) rotateY(${-rotation}deg) translateZ(250px)`,
+                                pointerEvents: 'auto'
+                              }}
+                            >
+                              <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                  <div className={cn(
+                                    "w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner",
+                                    selectedSource.category === 'healthy' ? "bg-emerald-500/20 text-emerald-400" :
+                                    selectedSource.category === 'unhealthy' ? "bg-rose-500/20 text-rose-400" :
+                                    "bg-amber-500/20 text-amber-400"
+                                  )}>
+                                    {getIconEmoji(selectedSource.icon)}
+                                  </div>
+                                  <div>
+                                    <div className="text-white font-bold text-sm leading-tight">
+                                      {selectedSource.name}
+                                    </div>
+                                    <div className="text-white/40 text-[10px] uppercase tracking-wider">
+                                      Current: {selectedSource.value} units
+                                    </div>
+                                  </div>
+                                </div>
+                                <button 
+                                  onClick={() => setShowQuickEdit(false)}
+                                  className="p-2 hover:bg-white/10 rounded-full transition-colors group"
+                                >
+                                  <X className="w-4 h-4 text-white/30 group-hover:text-white" />
+                                </button>
+                              </div>
+                              
+                              <div className="relative group">
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  placeholder="E.g. +5 or -2"
+                                  value={quickUpdateValue}
+                                  onChange={(e) => setQuickUpdateValue(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      handleRelativeUpdate(selectedSource.id, quickUpdateValue);
+                                    }
+                                  }}
+                                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10"
+                                />
+                                <button
+                                  onClick={() => handleRelativeUpdate(selectedSource.id, quickUpdateValue)}
+                                  className="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-blue-900/20"
+                                >
+                                  <Save className="w-4 h-4" />
+                                  <span className="text-xs font-bold uppercase tracking-wider">Update</span>
+                                </button>
+                              </div>
+                              
+                              <div className="mt-4 flex justify-between items-center px-1">
+                                <div className="flex gap-1">
+                                  {['+1', '+5', '-1', '-5'].map(val => (
+                                    <button
+                                      key={val}
+                                      onClick={() => handleRelativeUpdate(selectedSource.id, val)}
+                                      className="px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-[10px] text-white/60 hover:text-white transition-colors border border-white/5"
+                                    >
+                                      {val}
+                                    </button>
+                                  ))}
+                                </div>
+                                <div className="text-[9px] text-white/20 italic">
+                                  Press Enter to save
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </motion.div>
 
-                    {/* 3D Controls Overlay */}
-                    <div className="absolute bottom-8 right-8 flex flex-col gap-2 z-40">
-                      <div className="bg-black/40 backdrop-blur-md border border-white/10 p-2 rounded-xl flex flex-col gap-2">
-                        <button 
-                          onClick={() => setZoom(prev => Math.min(prev + 0.2, 3))}
-                          className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
-                          title="Zoom In"
-                        >
-                          <Plus className="w-5 h-5" />
-                        </button>
-                        <button 
-                          onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.5))}
-                          className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
-                          title="Zoom Out"
-                        >
-                          <Minus className="w-5 h-5" />
-                        </button>
-                        <div className="h-px bg-white/10 mx-2" />
+                    {/* 3D HUD Controls */}
+                    <div className="absolute bottom-10 right-10 flex flex-col gap-4 z-[100]">
+                      <div className="bg-black/60 backdrop-blur-2xl border border-white/10 p-3 rounded-2xl flex flex-col gap-3 shadow-2xl">
+                        <div className="flex flex-col gap-1">
+                          <button 
+                            onClick={() => setZoom(prev => Math.min(prev + 0.2, 3))}
+                            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition-all text-white/70 hover:text-white active:scale-90"
+                            title="Zoom In"
+                          >
+                            <Plus className="w-5 h-5" />
+                          </button>
+                          <button 
+                            onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.5))}
+                            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition-all text-white/70 hover:text-white active:scale-90"
+                            title="Zoom Out"
+                          >
+                            <Minus className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="h-px bg-white/10 mx-1" />
                         <button 
                           onClick={() => {
                             setRotation(0);
                             setTilt(0);
                             setZoom(1);
                           }}
-                          className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                          className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition-all text-white/70 hover:text-white active:scale-90"
                           title="Reset View"
                         >
                           <RotateCcw className="w-5 h-5" />
                         </button>
                       </div>
+                      
+                      <div className="bg-black/60 backdrop-blur-2xl border border-white/10 p-3 rounded-2xl flex items-center gap-3 shadow-2xl text-white/40 text-[10px] uppercase tracking-[0.2em]">
+                        <MousePointer2 className="w-3 h-3" />
+                        Drag to rotate • Scroll to zoom
+                      </div>
                     </div>
+
+                    {/* Selection Indicator HUD */}
+                    <AnimatePresence>
+                      {selectedId && selectedSource && !showQuickEdit && (
+                        <motion.div 
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          className="absolute top-24 right-10 z-[100] bg-black/60 backdrop-blur-2xl border border-white/10 p-4 rounded-2xl min-w-[200px] shadow-2xl"
+                        >
+                          <div className="text-[10px] text-white/40 uppercase tracking-widest mb-2">Selected Segment</div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl">{getIconEmoji(selectedSource.icon)}</span>
+                            <div>
+                              <div className="text-white font-bold">{selectedSource.name}</div>
+                              <div className="text-blue-400 text-xs font-mono">{Math.round(selectedSource.percentage)}% of total</div>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => setShowQuickEdit(true)}
+                            className="w-full mt-4 bg-white/5 hover:bg-white/10 text-white/70 text-[10px] uppercase tracking-widest py-2 rounded-lg transition-all border border-white/5"
+                          >
+                            Open Quick Edit
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
               </AnimatePresence>
